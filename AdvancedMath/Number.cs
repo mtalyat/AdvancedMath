@@ -39,12 +39,40 @@ namespace AdvancedMath
         /// </summary>
         public static Number Ten => new Number(10);
 
+        /// <summary>
+        /// Shorthand to create a new Number without a value.
+        /// </summary>
+        public static Number NaN => new Number(double.NaN);
+
+        /// <summary>
+        /// Shorthand to create a new Number with the value infinity.
+        /// </summary>
+        public static Number Infinity => new Number(double.PositiveInfinity);
+
+        /// <summary>
+        /// Shorthand to create a new Number with the value negative infinity.
+        /// </summary>
+        public static Number NegativeInfinity => new Number(double.NegativeInfinity);
+
         #endregion
+
+        private double value = 0;
 
         /// <summary>
         /// The value the Number holds.
         /// </summary>
-        public double Value { get; private set; }
+        public double Value
+        {
+            get
+            {
+                return value * (IsNegative ? -1 : 1);
+            }
+            private set
+            {
+                this.value = Math.Abs(value);
+                isNegative = value < 0;
+            }
+        }
 
         /// <summary>
         /// This Number as an integer. If the Number is not a whole number, it will be rounded to the nearest whole number.
@@ -65,6 +93,12 @@ namespace AdvancedMath
 
         public override bool IsNumber => true;
 
+        public override bool HasConstantOrVariable => false;
+
+        public override bool IsOne => Value == 1;
+
+        public override bool IsZero => Value == 0;
+
         // so you can interchangably use double or Number, and they act as the same thing.
         public static implicit operator double(Number n) => n.Value;
         public static implicit operator Number(double d) => new Number(d);
@@ -82,8 +116,28 @@ namespace AdvancedMath
         /// <param name="val"></param>
         public Number(double val)
         {
-            Value = val;
+            isNegative = val < 0;
+            value = Math.Abs(val);
         }
+
+        #endregion
+
+        #region General
+
+        /// <summary>
+        /// Creates a string of this Number in scientific notation.
+        /// </summary>
+        /// <returns></returns>
+        public string ScientificNotation()
+        {
+            return Value.ToString("E");
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+
 
         #endregion
 

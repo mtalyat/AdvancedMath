@@ -18,6 +18,7 @@ namespace AdvancedMath
         Power_Operator = (byte)'^',
         Factorial_Operator = (byte)'!',
         Derivative_Operator = (byte)'\'',
+        Separator = (byte)',',
         Sub = (byte)'_',
     }
 

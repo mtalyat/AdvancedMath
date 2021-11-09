@@ -37,7 +37,16 @@ namespace AdvancedMath
 
             public override bool IsConstant => Element.IsConstant && Exponent.IsConstant;
 
+            public override bool HasConstantOrVariable => Element.HasConstantOrVariable || Exponent.HasConstantOrVariable;
+
             public override bool IsNumber => Exponent.IsOne && Element.IsNumber;
+
+            public override bool IsOne => Exponent.IsZero || Element.IsOne;
+
+            public override bool IsZero => !Exponent.IsZero && Element.IsZero;
+
+            //if the element is negative, and the exponent is an odd number, it will be a negative number
+            public override bool IsNegative => Element.IsNegative && (Exponent.IsNumber && Exponent.ToNumber().IsWholeNumber && Exponent.ToNumber() % 2 == 1);
 
             #region Constructors
 
@@ -54,26 +63,53 @@ namespace AdvancedMath
 
             #endregion
 
+            #region General
+
+            public override Token Expand()
+            {
+                //we can only expand if the exponent is a number, and the element is an expression
+                if (Exponent.IsZero || !Exponent.IsNumber || !(Element is Expression)) return Clone();
+
+                Expression output = (Expression)Element;
+
+                for (int i = 1; i < Exponent.ToNumber(); i++)
+                {
+                    output = output.FOIL((Expression)Element.Clone());
+                }
+
+                return new TermElement(output, Number.One);
+            }
+
+            #endregion
+
             #region Solving
 
             public override Token Simplify()
             {
                 //does not matter what the element is if the exponent is 0
-                if (Exponent.IsValue(0)) return TermElement.One;
+                if (Exponent.IsZero) return One;
 
                 //simplify the values
                 TermElement clone = (TermElement)Clone();
                 clone.Element = (Element)clone.Element.Simplify();
                 clone.Exponent = (Element)clone.Exponent.Simplify();
 
-                if (clone.Element.IsNumber && clone.Exponent.IsNumber)
+                if (clone.Element.IsNumber && clone.Exponent.IsConstant)
                 {
-                    return new TermElement(new Number(Math.Pow(clone.Element.ToNumber(), clone.Exponent.ToNumber())), Number.One);
+                    Number n = clone.Element.ToNumber();
+
+                    Number pow = Math.Pow(n, clone.Exponent.ToNumber());
+
+                    //if the element number is a whole number, it must stay a whole number
+                    if (!n.IsWholeNumber || pow.IsWholeNumber)
+                    {
+                        return new TermElement(pow, Number.One);
+                    }
                 }
-                else
-                {
-                    return new TermElement((Element)Element.Simplify(), (Element)Exponent.Simplify());
-                }
+
+                //otherwise just simplify the element and exponent
+
+                return clone;
             }
 
             public override Token Evaluate(Scope scope)
@@ -82,28 +118,43 @@ namespace AdvancedMath
                 if (expo.IsZero) return Number.One;
                 if (expo.IsOne) return Element.Evaluate(scope);
 
-                Token val = Element.Evaluate(scope);
+                Token ele = Element.Evaluate(scope);
 
-                if (expo is Number e)
+                //if here, then must evaluate the element multiplied by itself, if there are no constants or variables left
+                if (ele.HasConstantOrVariable || expo.HasConstantOrVariable) return new TermElement((Element)(ele is Term t ? new Expression(t) : ele), (Element)(expo is Term s ? new Expression(s) : expo));
+
+                //no constants or variables, so we can actually evaluate it
+                if(ele.IsNumber)
                 {
-                    if (val is Number v)
-                    {
-                        return new Number(Math.Pow(v, e));
-                    }
-                    else if (e.IsWholeNumber && e > 0)
-                    {
-                        Token output = Number.One;
+                    return new Number(Math.Pow(ele.ToNumber(), expo.ToNumber()));
+                } else
+                {
+                    //if not a number, multiply it by itself several times
+                    Token output = Number.One;
 
-                        for (int i = 0; i < e; i++)
-                        {
-                            output = output.Multiply(val);
-                        }
-
-                        return output;
+                    for (int i = 0; i < expo.ToNumber(); i++)
+                    {
+                        output = output.Multiply(ele);
                     }
+
+                    return output;
                 }
+            }
 
-                return new TermElement((Element)expo, (Element)val);
+            public override Token Reduce()
+            {
+                //reduce if exponent == 1
+                if(Exponent.IsZero)
+                {
+                    return Number.One;
+                } else if (Exponent.IsOne)
+                {
+                    return Element.Reduce();
+                }
+                else
+                {
+                    return Clone();
+                }
             }
 
             #endregion
@@ -136,7 +187,7 @@ namespace AdvancedMath
 
             public override Number ToNumber()
             {
-                return Element.Clone() as Number;
+                return Element.ToNumber();
             }
 
             #endregion

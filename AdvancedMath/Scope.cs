@@ -17,6 +17,12 @@ namespace AdvancedMath
         public static Scope Empty => new Scope();
 
         /// <summary>
+        /// Determines if Constants will be kept as Constants when Evaluating. 
+        /// If false, all Constants will be turned into their double form.
+        /// </summary>
+        public bool KeepConstants { get; set; } = true;
+
+        /// <summary>
         /// A dictionary to store the variables and their corresponding values.
         /// </summary>
         private Dictionary<Variable, Number> variables;
@@ -30,11 +36,11 @@ namespace AdvancedMath
         }
 
         /// <summary>
-        /// Gets the corresponding value for the given Variable. If no value exists, an InterpreterException is thrown.
+        /// Gets the corresponding value for the given Variable.
         /// </summary>
         /// <param name="variable"></param>
-        /// <returns></returns>
-        public Number Get(Variable variable)
+        /// <returns>The number with the value of the variable, or a clone of the variable if no value exists.</returns>
+        public Operand Get(Variable variable)
         {
             Number value;
 
@@ -43,7 +49,7 @@ namespace AdvancedMath
                 return value;
             }
 
-            throw new InterpreterException($"Variable \"{variable}\" does not exist in the current scope.");
+            return (Variable)variable.Clone();
         }
 
         /// <summary>
@@ -64,6 +70,19 @@ namespace AdvancedMath
         public bool Remove(Variable variable)
         {
             return variables.Remove(variable);
+        }
+
+        /// <summary>
+        /// Clears all values and variables from the Scope.
+        /// </summary>
+        public void Clear()
+        {
+            variables.Clear();
+        }
+
+        public override string ToString()
+        {
+            return string.Join("; ", variables.Select(p => $"{p.Key} = {p.Value}").ToArray());
         }
     }
 }

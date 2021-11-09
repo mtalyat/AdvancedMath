@@ -14,9 +14,9 @@ namespace AdvancedMath
         #region Common Constants
 
         /// <summary>
-        /// Shorthand to create a new Constant with the value of 𝝅 (pi).
+        /// Shorthand to create a new Constant with the value of pi (𝝅).
         /// </summary>
-        public static Constant PI => new Constant("𝝅", Math.PI);
+        public static Constant PI => new Constant("pi", Math.PI);
 
         /// <summary>
         /// Shorthand to create a new Constant with the value of e (Euler's number).
@@ -34,6 +34,8 @@ namespace AdvancedMath
 
         // Returning false. It is a Number, but for most operations we want the Constant to not be mixed with other Numbers.
         public override bool IsNumber => false;
+
+        public override bool HasConstantOrVariable => true;
 
         #region Constructors
 
@@ -59,6 +61,26 @@ namespace AdvancedMath
 
         #endregion
 
+        #region Parsing
+
+        public static bool TryGetConstant(string name, out Constant constant)
+        {
+            switch(name)
+            {
+                case "pi":
+                    constant = PI;
+                    return true;
+                case "e":
+                    constant = E;
+                    return true;
+                default:
+                    constant = null;
+                    return false;
+            }
+        }
+
+        #endregion
+
         public override Token Clone()
         {
             return new Constant(Symbol, Value);
@@ -66,7 +88,7 @@ namespace AdvancedMath
 
         public override string ToString()
         {
-            return Symbol;
+            return IsNegative ? "-" : "" + Symbol;
         }
     }
 }

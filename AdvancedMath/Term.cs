@@ -34,12 +34,36 @@ namespace AdvancedMath
         //we know the coefficients will be constant since they are numbers
         public override bool IsConstant => denominators.All(e => e.IsConstant) && numerators.All(e => e.IsConstant);
 
+        public override bool HasConstantOrVariable => numerators.Any(e => e.HasConstantOrVariable) || denominators.Any(e => e.HasConstantOrVariable);
+
         /// <summary>
         /// True if the denominator is equal to 1.
         /// </summary>
         private bool IsDenominatorOne => coefficientDenominator.IsOne && denominators.All(d => d.IsOne);
 
+        public bool IsFraction => !IsDenominatorOne;
+
         public override bool IsNumber => numerators.Count == 1 && numerators[0].IsOne && IsDenominatorOne;
+
+        public override bool IsOne => coefficientNumerator.IsOne && numerators.All(n => n.IsOne) && IsDenominatorOne;
+
+        public override bool IsZero => coefficientNumerator.IsZero || numerators.Any(n => n.IsZero);
+
+        public override bool IsNegative
+        {
+            get
+            {
+                //if the total number of negatives % 2 == 0, it is not negative
+                int negCount = 0;
+                if (coefficientNumerator.IsNegative) negCount++;
+                if (coefficientDenominator.IsNegative) negCount++;
+
+                negCount += numerators.Count(n => n.IsNegative);
+                negCount += denominators.Count(d => d.IsNegative);
+
+                return negCount % 2 == 1;
+            }
+        }
 
         /// <summary>
         /// The coefficient for the numerator.
@@ -106,12 +130,19 @@ namespace AdvancedMath
         public Term(Number coefficient, Element[] numerators) : this(coefficient, Number.One, numerators, null) { }
 
         /// <summary>
+        /// Creates a new Term with the given coefficient, and the given Element as the numerator.
+        /// </summary>
+        /// <param name="coefficient"></param>
+        /// <param name="numerator"></param>
+        public Term(Number coefficient, Element numerator) : this(coefficient, numerator, Number.One) { }
+
+        /// <summary>
         /// Creates a new Term with the given coefficient, and an Element with its corresponding Exponent that will go in the numerator.
         /// </summary>
         /// <param name="coefficient"></param>
-        /// <param name="element"></param>
+        /// <param name="numerator"></param>
         /// <param name="exponent"></param>
-        public Term(Number coefficient, Element element, Element exponent) : this(coefficient, new Element[] { new TermElement(element, exponent) }) { }
+        public Term(Number coefficient, Element numerator, Element exponent) : this(coefficient, new Element[] { new TermElement(numerator, exponent) }) { }
 
         /// <summary>
         /// Creates a new Term with the given list of Elements for both the numerator, and denominator.
@@ -185,6 +216,12 @@ namespace AdvancedMath
             } else
             {
                 //otherwise just add it to the list
+                //if the list only has 1 in it, replace the 1
+                if (list.Count == 1 && list[0].IsOne)
+                {
+                    list.Clear();
+                }
+
                 list.Add(e);
             }
         }
@@ -203,7 +240,7 @@ namespace AdvancedMath
 
         #endregion
 
-        #region Helper Methods
+        #region General
 
         /// <summary>
         /// Determines if the given Term is a like Term, when compared to this Term.
@@ -222,12 +259,12 @@ namespace AdvancedMath
             //then actually check the terms
 
             //terms are not necessarily in order
-            foreach(TermElement te in numerators)
+            foreach (TermElement te in numerators)
             {
                 if (!other.numerators.Any(t => t.Equals(te))) return false;
             }
 
-            foreach(TermElement te in denominators)
+            foreach (TermElement te in denominators)
             {
                 if (!other.denominators.Any(t => t.Equals(te))) return false;
             }
@@ -248,35 +285,10 @@ namespace AdvancedMath
 
             //anything in the denom should be negated, since it is on the bottom part of the fraction
             //so, as long as the numerator returns a value, it should be used
-            if (n == double.NaN)
+            if (double.IsNaN(n.Value))
                 return d;
             else
                 return n;
-        }
-
-        /// <summary>
-        /// Finds the highest power within the given list of TermElements.
-        /// </summary>
-        /// <param name="list"></param>
-        /// <returns></returns>
-        private Number FindHighestPower(List<TermElement> list)
-        {
-            Number highest = double.NaN;
-
-            foreach(TermElement te in list)
-            {
-                //we don't care about constants, only variables
-                if(!te.Element.IsConstant && te.Exponent.IsNumber)
-                {
-                    Number n = te.Exponent.ToNumber();
-                    if(highest == double.NaN || n > highest)
-                    {
-                        highest = n;
-                    }
-                }
-            }
-
-            return highest;
         }
 
         /// <summary>
@@ -293,7 +305,7 @@ namespace AdvancedMath
             if (coefficientDenominator != other.coefficientDenominator || denominators.Count != other.denominators.Count) return false;
 
             //now check each element
-            foreach(TermElement te in denominators)
+            foreach (TermElement te in denominators)
             {
                 if (!other.denominators.Contains(te)) return false;
             }
@@ -317,7 +329,7 @@ namespace AdvancedMath
             clone.coefficientNumerator *= other.coefficientDenominator;
             clone.coefficientDenominator *= other.coefficientDenominator;
 
-            foreach(TermElement te in other.denominators)
+            foreach (TermElement te in other.denominators)
             {
                 clone.AddToNumerator(te);
                 clone.AddToNumerator(te);
@@ -327,12 +339,153 @@ namespace AdvancedMath
             return (Term)clone.Simplify();
         }
 
+        /// <summary>
+        /// Gets the inverse of this Term.
+        /// </summary>
+        /// <returns></returns>
+        public Term Inverse()
+        {
+            //clone the term
+            Term clone = (Term)Clone();
+
+            //flip the numerator and denominator
+            return new Term(clone.coefficientDenominator, clone.coefficientNumerator, clone.denominators.ToArray(), clone.numerators.ToArray());
+        }
+
+        public override Token Expand()
+        {
+            Expression output = new Expression(coefficientNumerator);
+
+            for (int i = 0; i < numerators.Count; i++)
+            {
+                TermElement te = (TermElement)numerators[i].Expand();
+
+                Token reduced = te.Reduce();
+
+                if(reduced is Expression e)
+                {
+                    output = output.FOIL(e);
+                } else if (reduced is Term t && !t.IsFraction)
+                {
+                    //term that cannot be reduced
+                    //if the term is not a fraction, we can extract the contents
+
+                    foreach(Token extracted in t.Extract())
+                    {
+                        if(extracted is Expression ee)
+                        {
+                            output = output.FOIL(ee);
+                        } else
+                        {
+                            output = (Expression)output.Multiply(extracted);
+                        }
+                    }
+                } else
+                {
+                    //another type, just multiply
+                    output = (Expression)output.Multiply(reduced);
+                }
+            }
+
+            return new Term(output);
+        }
+
+        /// <summary>
+        /// Extracts the Elements from the Numerator.
+        /// </summary>
+        /// <returns></returns>
+        public Token[] Extract()
+        {
+            List<Token> output = new List<Token>();
+
+            output.Add(coefficientNumerator.Clone());
+
+            foreach(TermElement te in numerators)
+            {
+                Token reduced = te.Reduce();
+
+                //only extract if it is not a fraction
+                if(reduced is Term t && !t.IsFraction)
+                {
+                    output.AddRange(t.Extract());
+                } else
+                {
+                    output.Add(reduced);
+                }
+            }
+
+            return output.ToArray();
+        }
+
+        /// <summary>
+        /// Raises this Term by the given exponent.
+        /// </summary>
+        /// <param name="exponent"></param>
+        /// <returns></returns>
+        public Term RaiseByPower(Element exponent)
+        {
+            //reduce if able
+            Token reduced = Reduce();
+
+            //put terms in expressions so it is an element, if needed
+            if (reduced is Term t)
+            {
+                reduced = new Expression(t);
+            }
+
+            //return that in a term element
+            return new Term(new TermElement((Element)reduced, exponent));
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Finds the highest power within the given list of TermElements.
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        private Number FindHighestPower(List<TermElement> list)
+        {
+            Number highest = Number.NaN;
+
+            foreach(TermElement te in list)
+            {
+                //we don't care about constants, only variables
+                if(te.Exponent.IsNumber)
+                {
+                    //if it is a constant, then the power is 0 regardless
+                    Number n;
+                    if(te.Element.IsConstant)
+                    {
+                        n = Number.Zero;
+                    } else
+                    {
+                        n = te.Exponent.ToNumber();
+                    }
+
+                    if(double.IsNaN(highest.Value) || n > highest)
+                    {
+                        highest = n;
+                    }
+                }
+            }
+
+            return highest;
+        }
+
         #endregion
 
         #region Solving
 
         public override Token Evaluate(Scope scope)
         {
+            //firstly, if there are any zeros, the whole thing turns into a zero regardless
+            if (coefficientNumerator == 0) return Number.Zero;
+
+            if (coefficientDenominator == 0) return Number.NaN;
+
             //evaluate all items in the numerator and denominator
             //we already know the coefficients are evaluated
             Term clone = (Term)Clone();
@@ -355,10 +508,10 @@ namespace AdvancedMath
             //otherwise, keep it as a fraction
 
             //if either num or den are not constant, it cannot be simplified any further
-            if (!numOut.IsConstant || !denOut.IsConstant) return CreateFraction((Element)numOut, (Element)denOut);
+            if (!numOut.IsConstant || !denOut.IsConstant) return CreateFraction(numOut, denOut);
 
             //if constant, try to reduce if possible
-            Term fraction = (Term)CreateFraction((Element)numOut, (Element)denOut).Simplify();
+            Term fraction = (Term)CreateFraction(numOut, denOut);
 
             //if the denominator is one, just return the numerator
             if (fraction.IsDenominatorOne)
@@ -399,7 +552,7 @@ namespace AdvancedMath
 
             //now that that is done, check the numerator values
             //TODO: combine any variables and add their exponents together
-            Dictionary<Element, TermElement> newElements = new Dictionary<Element, TermElement>();
+            Dictionary<Token, TermElement> newElements = new Dictionary<Token, TermElement>();
 
             foreach(TermElement e in numerators)
             {
@@ -409,8 +562,11 @@ namespace AdvancedMath
                 //if exponent is zero, ignore it
                 if (simplified.Exponent.IsZero) continue;
 
+                Token ele = simplified.Element.Reduce();
+                Token exp = simplified.Exponent.Reduce();
+
                 //if it simplifies to a number, multiply it to the coefficient
-                if(simplified.Exponent.IsOne && simplified.Element is Number n && !n.HasSymbol)
+                if (exp.IsOne && ele is Number n && !n.HasSymbol)
                 {
                     clone.coefficientNumerator *= n;
                     continue;
@@ -418,19 +574,17 @@ namespace AdvancedMath
 
                 TermElement ne;
 
-                if(newElements.TryGetValue(simplified.Element, out ne))
+                if(newElements.TryGetValue(ele, out ne))
                 {
                     //add to the exponent expression
                     //set it again in the dictionary
-                    ne = new TermElement(ne.Element, (Element)ne.Exponent.Add(simplified.Exponent).Simplify());
+                    ne = new TermElement(ne.Element, (Element)ne.Exponent.Add(exp).Simplify());
 
-                    //ne = (TermElement)ne.Simplify();
-
-                    newElements[simplified.Element] = ne;
+                    newElements[ele] = ne;
                 } else
                 {
                     //add whole thing
-                    newElements.Add(simplified.Element, simplified);
+                    newElements.Add(ele, simplified);
                 }
             }
 
@@ -440,6 +594,24 @@ namespace AdvancedMath
             clone.EnsureNomAndDenomAreNotEmpty();
 
             return clone;
+        }
+
+        public override Token Reduce()
+        {
+            //cannot reduce if it is a fraction/still division going on
+            if (numerators.Count > 1 || !IsDenominatorOne) return Clone();
+
+            //cannot reduce if there is still multiplication going on
+            if (!numerators[0].IsOne && !coefficientNumerator.IsOne) return Clone();
+
+            //return the one that is not one
+            if(coefficientNumerator.IsOne)
+            {
+                return numerators[0].Reduce();
+            } else
+            {
+                return coefficientNumerator.Reduce();
+            }
         }
 
         #endregion
@@ -482,20 +654,69 @@ namespace AdvancedMath
             {
                 //if it is anything else, multiply it by the denominator
                 //turn the nominator into an expression and add it
-                //Term term = new Term(new Element[] { })
-                throw new NotImplementedException();
+                Term clone = (Term)Clone();
+
+                clone.denominators.ForEach(d => clone.AddToNumerator(d));
+                clone.AddToNumerator(token is TermElement te ? te : new TermElement((Element)token, Number.One));
+
+                return clone;
             }
         }
 
         public override Token Multiply(Token token)
         {
-            //if it is an expression, multiply it that way
-            throw new NotImplementedException();
+            if (token.IsNumber)
+            {
+                //if it is a number, then multiply it into the coefficient
+                Term clone = (Term)Clone();
+
+                clone.coefficientNumerator *= token.ToNumber();
+
+                return clone;
+            }
+            else if (token is Term t)
+            {
+                //if it is another term, merge num and denom
+                return new Term(coefficientNumerator * t.coefficientNumerator, coefficientDenominator * t.coefficientDenominator,
+                    numerators.Concat(t.numerators).ToArray(), denominators.Concat(t.denominators).ToArray());
+            } else if (token is TermElement te)
+            {
+                Term clone = (Term)Clone();
+
+                //if it has a negative exponent, put it on the bottom
+                if (te.Exponent.IsNumber && te.Exponent.ToNumber() < 0)
+                {
+                    Number exp = te.Exponent.ToNumber();
+                    if(exp < 0)
+                    {
+                        clone.AddToDenominator(new TermElement(te.Element, exp));
+                        return clone;
+                    }
+                }
+
+                clone.AddToNumerator(te);
+
+                return clone;
+            } else
+            {
+                Term clone = (Term)Clone();
+
+                //if it is anything else, just add it to the numerator
+                clone.AddToNumerator(new TermElement((Element)token, Number.One));
+
+                return clone;
+            }
         }
 
         public override Number ToNumber()
         {
-            return (Number)coefficientNumerator.Clone();
+            Number numerator = coefficientNumerator;
+            Number denominator = coefficientDenominator;
+
+            numerators.ForEach(e => numerator *= e.ToNumber());
+            denominators.ForEach(e => denominator *= e.ToNumber());
+
+            return numerator / denominator;
         }
 
         #endregion
@@ -511,41 +732,43 @@ namespace AdvancedMath
 
             if (coefficientNumerator == 0 || coefficientDenominator == 0) return "0";
 
-            if (coefficientNumerator != 1 || coefficientDenominator != 1)
-            {
-                //if either the numberator or denominator are not 1, write the coefficient
-                sb.Append(coefficientNumerator.ToString());
+            bool printDenom = !IsDenominatorOne;
+            bool printNum = !numerators.All(e => e.IsOne);
 
-                //only write the denominator if it was not 1
-                if (coefficientDenominator != 1)
+            //if the coefficient numerator != 1, we print it
+            //or if the denominator != 1, we print it
+            if (coefficientNumerator != 1 || (printDenom && !printNum))
+            {
+                sb.Append(coefficientNumerator);
+            }
+
+            if(printNum)
+            {
+                foreach(TermElement te in numerators)
                 {
-                    sb.Append(Tokens.Divide_Operator.ToChar());
-                    sb.Append(coefficientDenominator.ToString());
+                    sb.Append(te);
                 }
             }
 
-            //force write the numerator value if no coefficient was written, or none of the numerator values are not one
-            if (sb.Length == 0 || numerators.Any(a => !a.IsOne))
+            if(printDenom)
             {
-                bool forceWrite = numerators.Count == 1;
+                sb.Append(Tokens.Divide_Operator.ToChar());
 
-                //write the numerator
-                foreach (TermElement e in numerators)
+                bool denomsAllOne = denominators.All(e => e.IsOne);
+
+                if (coefficientDenominator != 1 || denomsAllOne)
                 {
-                    //only print if the value != 1
-                    if (forceWrite || !e.IsOne)
+                    sb.Append(coefficientDenominator);
+                }
+
+                if(!denomsAllOne)
+                {
+                    foreach(TermElement te in denominators)
                     {
-                        sb.Append(e.ToString());
+                        sb.Append(te);
                     }
                 }
             }
-
-            //if the denominator is not 1, write it
-            //if(!(denominators is Number n) || (n != 1 && n != 0))
-            //{
-            //    sb.Append(Tokens.Divide_Operator.ToChar());
-            //    sb.Append(denominators.ToString());
-            //}
 
             //if nothing was printed, it must be 1
             if (sb.Length == 0) sb.Append("1");
@@ -559,9 +782,17 @@ namespace AdvancedMath
         /// <param name="numerator"></param>
         /// <param name="denominator"></param>
         /// <returns></returns>
-        public static Term CreateFraction(Element numerator, Element denominator)
+        public static Term CreateFraction(Token numerator, Token denominator)
         {
-            return new Term(new Element[] { numerator }, new Element[] { denominator });
+            if(numerator is Term n)
+            {
+                numerator = new Expression(n);
+            } else if(denominator is Term d)
+            {
+                denominator = new Expression(d);
+            }
+
+            return new Term(new Element[] { (Element)numerator }, new Element[] { (Element)denominator });
         }
     }
 }

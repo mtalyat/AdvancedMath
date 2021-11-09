@@ -6,6 +6,20 @@ using System.Threading.Tasks;
 
 namespace AdvancedMath
 {
+    /*
+     * Some notes about Tokens:
+     * 
+     * Simplify will simplify tokens. It will not change their type, but it will reduce them. For instance, a fraction in a Term could go from 6/2 to 3.
+     * 
+     * Evaluate will replace variables with their respective values, and then simplify, except it will change the type, if able.
+     * 
+     * TODO: Solve will find the values for all unknown variables in the equation.
+     * 
+     * IsConstant will return true if all tokens are constant (Constant, Number, or made up of those two). (No variables)
+     * IsNumber will return true if all tokens are numbers, but not Constants.
+     * HasConstant will return true if the token contains a Constant at all.
+     */
+
     /// <summary>
     /// The base class for all equation related things.
     /// </summary>
@@ -17,42 +31,59 @@ namespace AdvancedMath
         public abstract bool IsConstant { get; }
 
         /// <summary>
+        /// A Token has a Constant if there is a Constant or Variable stored anywhere within the Token, or if the Token is a Constant or Variable itself.
+        /// </summary>
+        public abstract bool HasConstantOrVariable { get; }
+
+        /// <summary>
         /// A Token is a number if the Token can be represented as a singular number with no symbols.
         /// Ex. "5" is a number, but "e" or "3/2" are not numbers.
         /// </summary>
         public abstract bool IsNumber { get; }
 
         /// <summary>
-        /// Returns a copy of this Token, simplified.
+        /// True if this Token can easily be represented as 1. Will not evaluate the Token.
         /// </summary>
-        /// <returns></returns>
-        public abstract Token Simplify();
+        public abstract bool IsOne { get; }
 
         /// <summary>
-        /// Checks if this Token can be Evaluated into the given Number, without a Scope.
-        /// Requires the Token to be constant, otherwise always returns false.
+        /// True if this Token can easily be represented as 0. Will not evaluate the Token.
         /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
-        public bool IsValue(Number number)
-        {
-            //if it is not constant, it cannot be evaluated to a value
-            if (!IsConstant) return false;
+        public abstract bool IsZero { get; }
 
-            Token t = Evaluate(Scope.Empty);//no scope is needed if it is constant
-
-            return t is Number n && n == number;
-        }
-
-        public bool IsOne => IsValue(1);
-        public bool IsZero => IsValue(0);
+        /// <summary>
+        /// True if the Token is negative.
+        /// </summary>
+        public abstract bool IsNegative { get; }
 
         /// <summary>
         /// Evaluates the Token to the best ability it can, given the scope, and returns it.
+        /// Evaluate will not necessarily retain the same object type.
         /// </summary>
         /// <param name="scope"></param>
-        /// <returns></returns>
+        /// <returns>An evaluated version of this Token.</returns>
         public abstract Token Evaluate(Scope scope);
+
+        /// <summary>
+        /// Returns a copy of this Token, simplified.
+        /// Simplify will retain the same object type.
+        /// </summary>
+        /// <returns>A simplified copy of this Token.</returns>
+        public abstract Token Simplify();
+
+        /// <summary>
+        /// Reduces this Token to another type, if able.
+        /// Ex. A Term with just a Variable in it will return the Variable.
+        /// </summary>
+        /// <returns></returns>
+        public abstract Token Reduce();
+
+        /// <summary>
+        /// Expands the Token, if able. 
+        /// The Token will retain the same object type.
+        /// </summary>
+        /// <returns></returns>
+        public abstract Token Expand();
 
         /// <summary>
         /// Returns a clone of this Token.

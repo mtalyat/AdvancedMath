@@ -27,7 +27,16 @@ namespace AdvancedMath
         //the Expression is only constant if all Terms within are constant
         public override bool IsConstant => terms.All(t => t.IsConstant);
 
+        public override bool HasConstantOrVariable => terms.Any(t => t.HasConstantOrVariable);
+
         public override bool IsNumber => terms.Count == 1 && terms[0].IsNumber;
+
+        public override bool IsOne => false;
+
+        public override bool IsZero => false;
+
+        //expressions are not inherently negative
+        public override bool IsNegative => false;
 
         private List<Term> terms;
 
@@ -54,6 +63,29 @@ namespace AdvancedMath
         public Expression(params Term[] terms)
         {
             this.terms = new List<Term>(terms);
+
+            //if there are no terms, we need at least something in here
+            if(!this.terms.Any())
+            {
+                AddTerm(Term.Zero);
+            }
+        }
+
+        #endregion
+
+        #region General
+
+        public override Token Expand()
+        {
+            //expand each term inside of terms
+            Expression clone = (Expression)Clone();
+
+            for (int i = 0; i < clone.terms.Count; i++)
+            {
+                clone.terms[i] = (Term)clone.terms[i].Expand();
+            }
+
+            return clone;
         }
 
         #endregion
@@ -66,6 +98,11 @@ namespace AdvancedMath
         /// <param name="term"></param>
         private void AddTerm(Term term)
         {
+            if(terms.Count == 1 && terms[0].IsZero)
+            {
+                terms.Clear();
+            }
+
             terms.Add(term);
         }
 
@@ -138,14 +175,15 @@ namespace AdvancedMath
 
         public override Token Evaluate(Scope scope)
         {
-            //evaluate each term, then add them together
-            Expression clone = (Expression)Clone();
+            //if there are no terms, it is zero
+            if (!terms.Any()) return Number.Zero;
 
-            Token output = Number.Zero;
+            //otherwise, just add all the terms together
+            Token output = terms[0].Evaluate(scope);
 
-            foreach(Term t in clone.terms)
+            for (int i = 1; i < terms.Count; i++)
             {
-                output = output.Add(t.Evaluate(scope));
+                output = output.Add(terms[i].Evaluate(scope));
             }
 
             return output;
@@ -186,8 +224,16 @@ namespace AdvancedMath
 
             //return a new expression with the simplified terms
             Expression output = new Expression(ts.ToArray());
+
             output.SortTerms();
             return output;
+        }
+
+        public override Token Reduce()
+        {
+            if (terms.Count > 1) return Clone();
+
+            return terms[0].Reduce();
         }
 
         #endregion
@@ -234,7 +280,7 @@ namespace AdvancedMath
             //otherwise, multiply all terms by the given token
             for (int i = 0; i < terms.Count; i++)
             {
-                output.Add(terms[i].Multiply(token));
+                output = (Expression)output.Add(terms[i].Multiply(token));
             }
 
             //lastly, simplify so that we know it is not all 0's
@@ -243,7 +289,11 @@ namespace AdvancedMath
 
         public override Number ToNumber()
         {
-            return terms[0].ToNumber();
+            Number output = Number.One;
+
+            terms.ForEach(t => output *= t.ToNumber());
+
+            return output;
         }
 
         #endregion
@@ -271,6 +321,9 @@ namespace AdvancedMath
             StringBuilder sb = new StringBuilder();
 
             sb.Append(TermListToString(terms));
+
+            //if nothing, the expression is zero
+            if (sb.Length == 0) sb.Append('0');
 
             return sb.ToString();
         }

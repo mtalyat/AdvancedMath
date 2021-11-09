@@ -43,9 +43,11 @@
   <ItemGroup>
     <Compile Include="Constant.cs" />
     <Compile Include="Element.cs" />
+    <Compile Include="Function.cs" />
+    <Compile Include="HiddenAttribute.cs" />
+    <Compile Include="ParsingException.cs" />
     <Compile Include="Expression.cs" />
     <Compile Include="Functions.cs" />
-    <Compile Include="InterpreterException.cs" />
     <Compile Include="Number.cs" />
     <Compile Include="Operand.cs" />
     <Compile Include="Parse.cs" />

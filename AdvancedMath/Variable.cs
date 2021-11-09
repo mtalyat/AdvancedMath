@@ -58,7 +58,13 @@ namespace AdvancedMath
 
         public override bool IsConstant => false;
 
+        public override bool HasConstantOrVariable => true;
+
         public override bool IsNumber => false;
+
+        public override bool IsOne => false;
+
+        public override bool IsZero => false;
 
         #region Constructors
 
@@ -73,7 +79,7 @@ namespace AdvancedMath
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="sub"></param>
-        public Variable(char symbol, ushort sub)
+        public Variable(char symbol, uint sub)
         {
             Symbol = symbol;
             Sub = sub;
@@ -146,6 +152,13 @@ namespace AdvancedMath
                 //if it is an expression, multiply it into the expression
                 return e.Multiply((Variable)Clone());
             }
+            else if (token is Number n && n == -1)
+            {
+                //if it is -1, just flip the negative value
+                Variable clone = (Variable)Clone();
+                clone.isNegative = !isNegative;
+                return clone;
+            }
             else
             {
                 //otherwise, just make a new term including both
@@ -156,7 +169,7 @@ namespace AdvancedMath
         public override Number ToNumber()
         {
             //variables cannot be turned into a number without a scope
-            return null;
+            return Number.NaN;
         }
 
         #endregion
@@ -170,12 +183,12 @@ namespace AdvancedMath
         {
             if (Sub > 0)
             {
-                return $"{Symbol}_{Sub}";
+                return $"{(IsNegative ? "-" : "")}{Symbol}_{Sub}";
             }
             else
             {
                 //if the sub is 0, no point in writing it
-                return Symbol.ToString();
+                return (IsNegative ? "-" : "") + Symbol.ToString();
             }
         }
     }

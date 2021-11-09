@@ -14,6 +14,20 @@ namespace AdvancedMath
     /// </summary>
     public abstract class Operand : Element
     {
+        protected bool isNegative = false;
 
+        public override bool IsNegative => isNegative;
+
+        //operands cannot ever be expanded
+        public override Token Expand()
+        {
+            return Clone();
+        }
+
+        //operands cannot be reduced
+        public override Token Reduce()
+        {
+            return Clone();
+        }
     }
 }
