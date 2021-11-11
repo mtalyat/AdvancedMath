@@ -760,7 +760,7 @@ namespace AdvancedMath
 
             if (printDenom)
             {
-                sb.Append(Tokens.Divide_Operator.ToChar());
+                sb.Append(Tokens.DIVISION);
 
                 bool denomsAllOne = denominators.All(e => e.IsOne);
 

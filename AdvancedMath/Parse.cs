@@ -8,7 +8,15 @@ namespace AdvancedMath
 {
     public static class Parse
     {
-        private static string brackets = "()[]{}<>";
+        /*
+         * In the future...
+         * 
+         * [ ] used for matrices
+         * { } used for Laplace transforms
+         * < > used for vectors
+         * ( ) used for parenthesis
+         */
+        private static string brackets = "()";
 
         private static string operators = "+-*/^%!";
 
@@ -24,14 +32,27 @@ namespace AdvancedMath
             }
         }
 
+        /// <summary>
+        /// Parses a string into a Token.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
         public static Token ParseString(string str)
         {
-            Expression expr = CompileExpression(SplitString(str));
+            Expression expr = ParseExpression(SplitString(str));
 
             //if the expression only has one term, extract that term
             return expr.Reduce();
         }
 
+        #region Parsing
+
+        /// <summary>
+        /// Parses an Element from the string at index i.
+        /// </summary>
+        /// <param name="strs"></param>
+        /// <param name="i"></param>
+        /// <returns></returns>
         private static Element ParseElement(string[] strs, ref int i)
         {
             //the output element
@@ -53,7 +74,7 @@ namespace AdvancedMath
                 string[] sub = SubArray(strs, i + 1, closingIndex - 1);
 
                 //set to the current token so we can decide what operation to do later
-                Token inside = CompileExpression(sub).Reduce();
+                Token inside = ParseExpression(sub).Reduce();
 
                 if (inside is Term t)
                 {
@@ -104,13 +125,13 @@ namespace AdvancedMath
                         int next = j;
                         for (; next < sub.Length; next++)
                         {
-                            if (sub[next][0] == Tokens.Separator.ToChar())
+                            if (sub[next][0] == Tokens.SEPARATOR)
                             {
                                 break;
                             }
                         }
 
-                        function.AddArgument(CompileExpression(SubArray(sub, j, next - 1)));
+                        function.AddArgument(ParseExpression(SubArray(sub, j, next - 1)));
 
                         j = next;
                     }
@@ -149,7 +170,12 @@ namespace AdvancedMath
             return currentElement;
         }
 
-        private static Expression CompileExpression(string[] strs)
+        /// <summary>
+        /// Parses an Expression from the given array of string tokens.
+        /// </summary>
+        /// <param name="strs"></param>
+        /// <returns></returns>
+        private static Expression ParseExpression(string[] strs)
         {
             //go through each string token and determine what it is, and how it should be organized
 
@@ -188,10 +214,15 @@ namespace AdvancedMath
                     {
                         nextOperandIsNegative = true;
                     }
-                    else
+                    else if (operation == ' ')
                     {
                         //normal operation
                         operation = c;
+                    }
+                    else
+                    {
+                        //this means that we had two operators in a row, such as "/ +"
+                        throw new ParsingException("Too many operators in succession.", $"{operation} and {c}");
                     }
 
                     //nothing else can be done, so just move on to the next iteration
@@ -238,6 +269,7 @@ namespace AdvancedMath
                     if (operation == '-')
                     {
                         currentTerm = (Term)currentTerm.Multiply(Number.NegativeOne);
+                        operation = ' ';//clear the operation, since it technically did it's job
                     }
 
                     continue;
@@ -267,7 +299,7 @@ namespace AdvancedMath
                     //TODO: function mod() and function fact() for % and !
 
                     default://no idea what this is
-                        throw new NotImplementedException($"Unknown operator: {operation}.");
+                        throw new ParsingException($"Unimplemented operator.", operation.ToString());
                 }
 
                 //handle negativity
@@ -281,6 +313,12 @@ namespace AdvancedMath
                 operation = ' ';
             }
 
+            //operation should be cleared by the end, so if we have an operation left over, an error has occured
+            if(operation != ' ')
+            {
+                throw new ParsingException("Unmatched operator at end of line.", operation.ToString());
+            }
+
             //add the current term to the output
             output = (Expression)output.Add(currentTerm);
 
@@ -288,6 +326,17 @@ namespace AdvancedMath
             return output;
         }
 
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Creates a sub array from the given array, using the inclusive start and end indices.
+        /// </summary>
+        /// <param name="strs"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
         private static string[] SubArray(string[] strs, int start, int end)
         {
             int length = end - start + 1;
@@ -299,6 +348,13 @@ namespace AdvancedMath
             return output;
         }
 
+        /// <summary>
+        /// Finds the next corresponding bracket to the given opening bracket, starting at the index start.
+        /// </summary>
+        /// <param name="strs"></param>
+        /// <param name="start"></param>
+        /// <param name="open"></param>
+        /// <returns></returns>
         private static int FindNextBracket(string[] strs, int start, char open)
         {
             int depth = 0;
@@ -401,11 +457,23 @@ namespace AdvancedMath
             return output.ToArray();
         }
 
+        #region Char Determination
+
+        /// <summary>
+        /// Determines if the given char is an operator.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         private static bool IsOperator(char c)
         {
             return operators.Contains(c);
         }
 
+        /// <summary>
+        /// Determines if the given char is an opening bracket.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         private static bool IsOpeningBracket(char c)
         {
             int index = brackets.IndexOf(c);
@@ -413,6 +481,11 @@ namespace AdvancedMath
             return index >= 0 && index % 2 == 0;
         }
 
+        /// <summary>
+        /// Determines if the given char is a closing bracket.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         private static bool IsClosingBracket(char c)
         {
             int index = brackets.IndexOf(c);
@@ -420,11 +493,22 @@ namespace AdvancedMath
             return index >= 0 && index % 2 == 1;
         }
 
+        /// <summary>
+        /// Determines if the given char is a bracket.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         private static bool IsBracket(char c)
         {
             return brackets.Contains(c);
         }
 
+        /// <summary>
+        /// Determines if the given left and right chars are matching brackets.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
         private static bool IsMatchingBrackets(char left, char right)
         {
             int index = brackets.IndexOf(left);
@@ -435,5 +519,9 @@ namespace AdvancedMath
             //otherwise make sure the left matches the right
             return brackets[index + 1] == right;
         }
+
+        #endregion
+
+        #endregion
     }
 }

@@ -9,16 +9,38 @@ namespace AdvancedMath
     /// <summary>
     /// ParsingExceptions are thrown when there is an error parsing a string in the Parse class.
     /// </summary>
-    class ParsingException : Exception
+    public class ParsingException : Exception
     {
+        private readonly string errorToken;
+
+        public override string Message
+        {
+            get
+            {
+                if (errorToken == "")
+                {
+                    return base.Message;
+                }
+                else
+                {
+                    return $"{base.Message} ({errorToken})";
+                }
+            }
+        }
+
         public ParsingException() : base()
         {
-
+            errorToken = "";
         }
 
         public ParsingException(string message) : base(message)
         {
+            errorToken = "";
+        }
 
+        public ParsingException(string message, string token) : base(message)
+        {
+            errorToken = token;
         }
     }
 }

@@ -208,7 +208,7 @@ namespace AdvancedMath
                 //write the exponent, if it is not one
                 if (!(Exponent.Simplify() is Number n) || n != 1)
                 {
-                    sb.Append(Tokens.Power_Operator.ToChar());
+                    sb.Append(Tokens.POWER);
                     sb.Append(Exponent.ToStringParentheses(Exponent is Expression));
                 }
 

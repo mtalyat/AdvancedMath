@@ -6,27 +6,29 @@ using System.Threading.Tasks;
 
 namespace AdvancedMath
 {
-    enum Tokens : byte
+    /// <summary>
+    /// This class holds constants used throughout the program for displaying operators and such.
+    /// Put in a class and made const so that they can be easily modified if needed.
+    /// </summary>
+    internal static class Tokens
     {
-        Empty = (byte)' ',
-        Open_Parenthesis = (byte)'(',
-        Close_Parenthesis = (byte)')',
-        Add_Operator = (byte)'+',
-        Subtract_Operator = (byte)'-',
-        Multiply_Operator = (byte)'*',
-        Divide_Operator = (byte)'/',
-        Power_Operator = (byte)'^',
-        Factorial_Operator = (byte)'!',
-        Derivative_Operator = (byte)'\'',
-        Separator = (byte)',',
-        Sub = (byte)'_',
-    }
+        public const char EMPTY = ' ';
 
-    static class TokensExtensions
-    {
-        public static char ToChar(this Tokens token)
-        {
-            return (char)token;
-        }
+        public const char OPEN_PARENTHESIS = '(';
+        public const char CLOSE_PARENTHESIS = ')';
+
+        public const char EQUALS = '=';
+
+        public const char ADDITION = '+';
+        public const char SUBTRACTION = '-';
+        public const char MULTIPLICATION = '*';
+        public const char DIVISION = '/';
+        public const char POWER = '^';
+        public const char FACTORIAL = '!';
+        public const char MODULUS = '%';
+
+        public const char SEPARATOR = ',';
+
+        public const char SUB = '_';
     }
 }
