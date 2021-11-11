@@ -32,6 +32,123 @@ namespace AdvancedMath
             return expr.Reduce();
         }
 
+        private static Element ParseElement(string[] strs, ref int i)
+        {
+            //the output element
+            Element currentElement;
+
+            //the first character of the current token
+            string current = strs[i];
+            char c = current[0];
+
+            //used to parse numbers
+            double val;
+
+            if (IsOpeningBracket(c))
+            {
+                //find the closing bracket
+                int closingIndex = FindNextBracket(strs, i + 1, current[0]);
+
+                //get the string tokens in between the two brackets
+                string[] sub = SubArray(strs, i + 1, closingIndex - 1);
+
+                //set to the current token so we can decide what operation to do later
+                Token inside = CompileExpression(sub).Reduce();
+
+                if (inside is Term t)
+                {
+                    inside = new Expression(t);
+                }
+
+                currentElement = (Element)inside;
+
+                //set the next i to the closing bracket,
+                //so that the next iteration starts after that
+                i = closingIndex;
+            }
+            else if (IsClosingBracket(c))
+            {
+                //opening brackets should handle closing brackets, so if it got here, that means there was a closing bracket
+                //that is missing an opening bracket
+                throw new ParsingException($"Mismatch brackets: The opening bracket for {c} could not be found.");
+            }
+            else if (double.TryParse(current, out val))
+            {
+                //ope, it is a number
+                Number n = new Number(val);
+
+                currentElement = n;
+            }
+            else if (char.IsLetter(c))
+            {
+                //could be a variable, constant or a function name
+                Constant constant;
+                Function function;
+
+                //first check for constant
+                if (Constant.TryGetConstant(current, out constant))
+                {
+                    //it is a constant
+                    currentElement = constant;
+                }
+                else if (Functions.TryGetFunction(current, out function))
+                {
+                    //the next token should be an open parenthesis
+                    int closingIndex = FindNextBracket(strs, i + 2, strs[i + 1][0]);
+
+                    string[] sub = SubArray(strs, i + 2, closingIndex - 1);
+
+                    //split the arguments up by commas
+                    for (int j = 0; j < sub.Length; j++)
+                    {
+                        int next = j;
+                        for (; next < sub.Length; next++)
+                        {
+                            if (sub[next][0] == Tokens.Separator.ToChar())
+                            {
+                                break;
+                            }
+                        }
+
+                        function.AddArgument(CompileExpression(SubArray(sub, j, next - 1)));
+
+                        j = next;
+                    }
+
+                    i = closingIndex;
+
+                    //it is a function
+                    currentElement = function;
+                }
+                else if (current.Length == 1 || current[1] == '_')
+                {
+                    //it is a variable
+                    string[] split = current.Split('_');
+
+                    if (split.Length == 1)
+                    {
+                        currentElement = new Variable(split[0][0]);
+                    }
+                    else
+                    {
+                        currentElement = new Variable(split[0][0], uint.Parse(split[1]));
+                    }
+                }
+                else
+                {
+                    //not sure what it was
+                    throw new ParsingException($"Unknown Token: \"{current}\"");
+                }
+            }
+            else
+            {
+                //not sure what it was
+                throw new ParsingException($"Unknown Token: \"{current}\"");
+            }
+
+            return currentElement;
+        }
+
         private static Expression CompileExpression(string[] strs)
         {
             //go through each string token and determine what it is, and how it should be organized
@@ -54,7 +171,6 @@ namespace AdvancedMath
 
             string current;
             char c;
-            double val;
 
             for (int i = 0; i < strs.Length; i++)
             {
@@ -76,122 +192,58 @@ namespace AdvancedMath
                         operation = c;
                     }
 
+                    //nothing else can be done, so just move on to the next iteration
                     continue;
                 }
 
                 //everything else is an operand of some sort
-
-                if (IsOpeningBracket(c))
-                {
-                    //find the closing bracket
-                    int closingIndex = FindNextBracket(strs, i + 1, current[0]);
-
-                    //get the string tokens in between the two brackets
-                    string[] sub = SubArray(strs, i + 1, closingIndex - 1);
-
-                    //set to the current token so we can decide what operation to do later
-                    Token inside = CompileExpression(sub).Reduce();
-
-                    if(inside is Term t)
-                    {
-                        inside = new Expression(t);
-                    }
-
-                    currentElement = (Element)inside;
-
-                    //set the next i to the closing bracket,
-                    //so that the next iteration starts after that
-                    i = closingIndex;
-                }
-                else if (IsClosingBracket(c))
-                {
-                    //opening brackets should handle closing brackets, so if it got here, that means there was a closing bracket
-                    //that is missing an opening bracket
-                    throw new ParsingException($"Mismatch brackets: The opening bracket for {c} could not be found.");
-                }
-                else if (double.TryParse(current, out val))
-                {
-                    //ope, it is a number
-                    Number n = new Number(val);
-
-                    currentElement = n;
-                }
-                else if (char.IsLetter(c))
-                {
-                    //could be a variable, constant or a function name
-                    Constant constant;
-                    Function function;
-
-                    //first check for constant
-                    if (Constant.TryGetConstant(current, out constant))
-                    {
-                        //it is a constant
-                        currentElement = constant;
-                    }
-                    else if (Functions.TryGetFunction(current, out function))
-                    {
-                        //the next token should be an open parenthesis
-                        int closingIndex = FindNextBracket(strs, i + 2, strs[i + 1][0]);
-
-                        string[] sub = SubArray(strs, i + 2, closingIndex - 1);
-
-                        //split the arguments up by commas
-                        for (int j = 0; j < sub.Length; j++)
-                        {
-                            int next = j;
-                            for (; next < sub.Length; next++)
-                            {
-                                if(sub[next][0] == Tokens.Separator.ToChar())
-                                {
-                                    break;
-                                }
-                            }
-
-                            function.AddArgument(CompileExpression(SubArray(sub, j, next - 1)));
-
-                            j = next;
-                        }
-
-                        i = closingIndex;
-
-                        //it is a function
-                        currentElement = function;
-                    }
-                    else if (current.Length == 1 || current[1] == '_')
-                    {
-                        //it is a variable
-                        string[] split = current.Split('_');
-
-                        if (split.Length == 1)
-                        {
-                            currentElement = new Variable(split[0][0]);
-                        }
-                        else
-                        {
-                            currentElement = new Variable(split[0][0], uint.Parse(split[1]));
-                        }
-                    }
-                    else
-                    {
-                        //not sure what it was
-                        throw new ParsingException($"Unknown Token: \"{current}\"");
-                    }
-                }
-                else
-                {
-                    //not sure what it was
-                    throw new ParsingException($"Unknown Token: \"{current}\"");
-                }
+                currentElement = ParseElement(strs, ref i);
 
                 //now decide what to do based on the operation
 
-                //or if the left has not been filled, fill that
+                //right associative operations
+                while(i < strs.Length - 2 && strs[i + 1][0] == '^')
+                {
+                    //if there is enough room for an operation and an operand, at least, then check if the next operation is right associative, then decide what to do
+
+                    //move i to the element after the ^
+                    i += 2;
+
+                    bool isNegative = strs[i][0] == '-';
+
+                    if (isNegative)
+                    {
+                        i++;
+                    }
+
+                    Element temp = ParseElement(strs, ref i);
+
+                    if(isNegative)
+                    {
+                        temp = (Element)temp.Multiply(Number.NegativeOne);
+                    }
+
+                    //now raise the current element by the exponent
+                    currentElement = new Term.TermElement(currentElement, temp);
+                }
+
+                //if the left has not been filled, fill that
                 if (currentTerm == null)
                 {
                     currentTerm = new Term(currentElement);
+
+                    //if the operation is a -, but there is no term before to use it with, that means this term is negative
+                    if (operation == '-')
+                    {
+                        currentTerm = (Term)currentTerm.Multiply(Number.NegativeOne);
+                    }
+
                     continue;
                 }
 
+                //after right associative operators have been dealth with, then left associative can act as normal
+
+                //left associative operations
                 switch (operation)
                 {
                     case '+'://adding, which implies that the last term is complete, so it can be added to the output
@@ -208,9 +260,6 @@ namespace AdvancedMath
                         break;
                     case '/'://division, which is multiplication, except the new token needs to be on the denominator
                         currentTerm = (Term)currentTerm.Multiply(Term.CreateFraction(Number.One, currentElement));
-                        break;
-                    case '^'://power, so just put the current term in another term, with this element as the exponent 
-                        currentTerm = Term.RaisePower(currentTerm, currentElement);
                         break;
 
                     //TODO: function mod() and function fact() for % and !
@@ -247,7 +296,6 @@ namespace AdvancedMath
 
             return output;
         }
-
 
         private static int FindNextBracket(string[] strs, int start, char open)
         {
@@ -298,6 +346,9 @@ namespace AdvancedMath
 
             char c;
             char lastC = ' ';
+
+            //get rid of spaces and double negatives
+            str = str.Replace(" ", "").Replace("--", "+");
 
             StringBuilder current = new StringBuilder();
 

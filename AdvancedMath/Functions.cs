@@ -60,6 +60,9 @@ namespace AdvancedMath
         }
 
         #region General
+        /*
+         * General functions are functions that do not necessarily fall directly into one of the other categories.
+         */
 
         /// <summary>
         /// Returns the amount of decimal placed this number has.
@@ -84,7 +87,29 @@ namespace AdvancedMath
 
         #endregion
 
+        #region Operations
+        /*
+         * Operation functions are functions that perform unusual operations, such as modulus (%) or factorial (!).
+         */
+
+        public static Number Mod(Token t1, Token t2)
+        {
+            return t1.ToNumber() % t2.ToNumber();
+        }
+
+        #endregion
+
         #region Algebra
+        /*
+         * Algebra functions are functions that directly relate to algebra.
+         */
+
+        /*
+         * TO ADD:
+         * 
+         * 
+         * 
+         */
 
         /// <summary>
         /// Finds the Greatest Common Factor of two numbers.
@@ -114,7 +139,18 @@ namespace AdvancedMath
 
         #endregion
 
-        #region Triginometry
+        #region Trigonometry
+        /*
+         * Trigonometry functions are functions that directly relate to trigonometry.
+         */
+
+        /*
+         * TO ADD:
+         * 
+         * DegToRad
+         * RadToDeg
+         * 
+         */
 
         /// <summary>
         /// Performs the cos function, using the given radians as input.
@@ -124,6 +160,16 @@ namespace AdvancedMath
         public static Number Cos(Token t)
         {
             return Math.Cos(t.ToNumber());
+        }
+
+        /// <summary>
+        /// Performs the arccos function, using the given radians as input.
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static Number Acos(Token t)
+        {
+            return Math.Acos(t.ToNumber());
         }
 
         /// <summary>
@@ -137,13 +183,33 @@ namespace AdvancedMath
         }
 
         /// <summary>
-        /// Performs the cos function, using the given radians as input.
+        /// Performs the arcsin function, using the given radians as input.
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static Number Asin(Token t)
+        {
+            return Math.Asin(t.ToNumber());
+        }
+
+        /// <summary>
+        /// Performs the tan function, using the given radians as input.
         /// </summary>
         /// <param name="num"></param>
         /// <returns></returns>
         public static Number Tan(Token t)
         {
             return Math.Tan(t.ToNumber());
+        }
+
+        /// <summary>
+        /// Performs the arctan function, using the given radians as input.
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static Number Atan(Token t)
+        {
+            return Math.Atan(t.ToNumber());
         }
 
         #endregion

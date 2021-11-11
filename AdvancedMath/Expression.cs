@@ -330,7 +330,7 @@ namespace AdvancedMath
 
         public override string ToString(bool wrapInParenthesis)
         {
-            if (!wrapInParenthesis || terms.Count == 1) return ToString();
+            if (!wrapInParenthesis) return ToString();
 
             StringBuilder sb = new StringBuilder();
 

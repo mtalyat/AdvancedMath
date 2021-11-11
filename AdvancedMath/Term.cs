@@ -787,7 +787,8 @@ namespace AdvancedMath
             if(numerator is Term n)
             {
                 numerator = new Expression(n);
-            } else if(denominator is Term d)
+            }
+            if(denominator is Term d)
             {
                 denominator = new Expression(d);
             }
