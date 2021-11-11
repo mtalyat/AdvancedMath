@@ -1,0 +1,4 @@
+﻿TODO:
+
+Parse
+- Switch over to RPN, evaluate tokens that way to account for right associative operators (^)
