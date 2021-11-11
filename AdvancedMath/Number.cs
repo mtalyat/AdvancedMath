@@ -138,6 +138,9 @@ namespace AdvancedMath
             return Value.ToString("E");
         }
 
+        //TODO: Approximate
+        //should approximate the number to a fraction, if it is not a whole number
+
         #endregion
 
         #region Helper Methods

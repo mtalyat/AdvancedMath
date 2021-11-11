@@ -59,6 +59,21 @@ namespace AdvancedMath
             return false;
         }
 
+        /// <summary>
+        /// Gets a Function based on the given name.
+        /// </summary>
+        /// <param name="name">The name of the Function, case insensitive.</param>
+        /// <returns>The Function, or null if not found.</returns>
+        [Hidden]
+        public static Function GetFunction(string name)
+        {
+            Function f;
+
+            TryGetFunction(name, out f);
+
+            return f;
+        }
+
         #region General
         /*
          * General functions are functions that do not necessarily fall directly into one of the other categories.

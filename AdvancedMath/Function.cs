@@ -22,7 +22,7 @@ namespace AdvancedMath
         //functions are not inherently negative
         public override bool IsNegative => false;
 
-        public string Name => methodInfo.Name;
+        public string Name { get; private set; }
 
         public int ParameterCount => methodInfo.GetParameters().Length;
 
@@ -40,6 +40,9 @@ namespace AdvancedMath
         {
             methodInfo = method;
             arguments = new List<Token>(args);
+
+            //make the first char lowercase in the name
+            Name = char.ToLower(method.Name[0]) + method.Name.Substring(1);
         }
 
         #endregion
@@ -73,18 +76,22 @@ namespace AdvancedMath
         public override Token Evaluate(Scope scope)
         {
             //if all arguments were properly evaluated, then run the method
+            //if the method returns a whole number, return it
             //otherwise return a new Function with the new evaluated arguments
 
             Function clone = new Function(methodInfo, arguments.Select(a => a.Evaluate(scope)).ToArray());
 
-            if (IsConstant)
+            if (clone.IsConstant)
             {
-                return (Token)methodInfo.Invoke(null, arguments.Select(a => a.Evaluate(scope)).ToArray());
+                Token output = (Token)methodInfo.Invoke(null, clone.arguments.ToArray());
+
+                if(output.ToNumber().IsWholeNumber)
+                {
+                    return output;
+                }
             }
-            else
-            {
-                return clone;
-            }
+
+            return clone;
         }
 
         public override Token Simplify()
@@ -103,7 +110,7 @@ namespace AdvancedMath
         public override Number ToNumber()
         {
             //if the function evaluates to a number, and the inputs are all constants, it can be done
-            if(methodInfo.ReturnType == typeof(Number) && arguments.All(a => a.IsConstant))
+            if(methodInfo.ReturnType == typeof(Number) && IsConstant)
             {
                 return (Number)methodInfo.Invoke(null, arguments.Select(a => a.Evaluate(Scope.Empty)).ToArray());
             } else
@@ -155,7 +162,7 @@ namespace AdvancedMath
 
         public override string ToString()
         {
-            return $"{Name}({string.Join(", ", arguments.Select(a => a.ToString()).ToArray())})";
+            return $"{Name}({string.Join(", ", arguments.Select(a => a.Reduce().ToString()).ToArray())})";
         }
     }
 }

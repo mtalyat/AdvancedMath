@@ -193,7 +193,7 @@ namespace AdvancedMath
             Element currentElement;
             Term currentTerm = null;
 
-            char operation = ' ';
+            char operation = Tokens.EMPTY;
 
             bool nextOperandIsNegative = false;
 
@@ -210,11 +210,11 @@ namespace AdvancedMath
                     //if it is an operator, set the next operation
 
                     //catch negative signs only
-                    if (c == '-' && operation != ' ')
+                    if (c == Tokens.SUBTRACTION && operation != Tokens.EMPTY)
                     {
                         nextOperandIsNegative = true;
                     }
-                    else if (operation == ' ')
+                    else if (operation == Tokens.EMPTY)
                     {
                         //normal operation
                         operation = c;
@@ -235,14 +235,14 @@ namespace AdvancedMath
                 //now decide what to do based on the operation
 
                 //right associative operations
-                while(i < strs.Length - 2 && strs[i + 1][0] == '^')
+                while(i < strs.Length - 2 && strs[i + 1][0] == Tokens.POWER)
                 {
                     //if there is enough room for an operation and an operand, at least, then check if the next operation is right associative, then decide what to do
 
                     //move i to the element after the ^
                     i += 2;
 
-                    bool isNegative = strs[i][0] == '-';
+                    bool isNegative = strs[i][0] == Tokens.SUBTRACTION;
 
                     if (isNegative)
                     {
@@ -266,10 +266,10 @@ namespace AdvancedMath
                     currentTerm = new Term(currentElement);
 
                     //if the operation is a -, but there is no term before to use it with, that means this term is negative
-                    if (operation == '-')
+                    if (operation == Tokens.SUBTRACTION)
                     {
                         currentTerm = (Term)currentTerm.Multiply(Number.NegativeOne);
-                        operation = ' ';//clear the operation, since it technically did it's job
+                        operation = Tokens.EMPTY;//clear the operation, since it technically did it's job
                     }
 
                     continue;
@@ -280,20 +280,25 @@ namespace AdvancedMath
                 //left associative operations
                 switch (operation)
                 {
-                    case '+'://adding, which implies that the last term is complete, so it can be added to the output
+                    case Tokens.ADDITION://adding, which implies that the last term is complete, so it can be added to the output
                         output = (Expression)output.Add(currentTerm);
                         currentTerm = new Term(currentElement);//new token becomes the working term
                         break;
-                    case '-'://subtraction, which implies that the last term is complete, so it can be added to the output. The next element is negative
+                    case Tokens.SUBTRACTION://subtraction, which implies that the last term is complete, so it can be added to the output. The next element is negative
                         output = (Expression)output.Add(currentTerm);
                         currentTerm = new Term(Number.NegativeOne, currentElement);
                         break;
-                    case '*'://multiplication, which implies that the new token should be multiplied into the term
-                    case ' '://if there was no operator, we assume that it was a multiplication                    
+                    case Tokens.MULTIPLICATION://multiplication, which implies that the new token should be multiplied into the term
+                    case Tokens.EMPTY://if there was no operator, we assume that it was a multiplication                    
                         currentTerm = (Term)currentTerm.Multiply(currentElement);
                         break;
-                    case '/'://division, which is multiplication, except the new token needs to be on the denominator
+                    case Tokens.DIVISION://division, which is multiplication, except the new token needs to be on the denominator
                         currentTerm = (Term)currentTerm.Multiply(Term.CreateFraction(Number.One, currentElement));
+                        break;
+                    case Tokens.MODULUS:
+                        Function f = Functions.GetFunction("Mod");
+                        f.AddArguments(new Token[] { currentTerm, currentElement });
+                        currentTerm = new Term(f);
                         break;
 
                     //TODO: function mod() and function fact() for % and !
@@ -310,11 +315,11 @@ namespace AdvancedMath
                 }
 
                 //we are done, so clear the current element and operation
-                operation = ' ';
+                operation = Tokens.EMPTY;
             }
 
             //operation should be cleared by the end, so if we have an operation left over, an error has occured
-            if(operation != ' ')
+            if(operation != Tokens.EMPTY)
             {
                 throw new ParsingException("Unmatched operator at end of line.", operation.ToString());
             }
