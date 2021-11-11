@@ -269,7 +269,7 @@ namespace AdvancedMath
                 throw new ArgumentException("The given Token to add must be a Term, or an Element.");
             }
 
-            return clone.Simplify();
+            return clone;
         }
 
         public override Token Multiply(Token token)

@@ -319,7 +319,7 @@ namespace AdvancedMath
             foreach (TermElement te in other.denominators)
             {
                 clone.AddToNumerator(te);
-                clone.AddToNumerator(te);
+                clone.AddToDenominator(te);
             }
 
             //now it has a common denominator
@@ -713,14 +713,19 @@ namespace AdvancedMath
             return new Term((Number)coefficientNumerator.Clone(), (Number)coefficientDenominator.Clone(), numerators.Select(e => (TermElement)e.Clone()).ToArray(), denominators.Select(e => (TermElement)e.Clone()).ToArray());
         }
 
-        private string CoefficientToString(Number coefficient, bool showNegativeSign)
+        private string CoefficientToString(Number coefficient, bool showNumberIfOne, bool showNegativeSign)
         {
-            if (coefficient == -1)
+            if(coefficient.RawValue == 1 && !showNumberIfOne)
             {
-                //if a negative 1, only do the negative sign
-                return "-";
-            }
-            else
+                if (showNegativeSign && coefficient.IsNegative)
+                {
+                    return "-";
+                }
+                else
+                {
+                    return "";
+                }
+            } else
             {
                 if (showNegativeSign)
                 {
@@ -728,7 +733,6 @@ namespace AdvancedMath
                 }
                 else
                 {
-                    //raw value will not show the negative sign at all
                     return coefficient.RawValue.ToString();
                 }
             }
@@ -747,7 +751,7 @@ namespace AdvancedMath
             //or if the denominator != 1, we print it
             if (coefficientNumerator != 1 || (printDenom && !printNum))
             {
-                sb.Append(CoefficientToString(coefficientNumerator, showNegativeSign));
+                sb.Append(CoefficientToString(coefficientNumerator, !printNum, showNegativeSign));
             }
 
             if (printNum)
@@ -766,7 +770,7 @@ namespace AdvancedMath
 
                 if (coefficientDenominator != 1 || denomsAllOne)
                 {
-                    sb.Append(CoefficientToString(coefficientDenominator, showNegativeSign));
+                    sb.Append(CoefficientToString(coefficientDenominator, denomsAllOne, showNegativeSign));
                 }
 
                 if (!denomsAllOne)
