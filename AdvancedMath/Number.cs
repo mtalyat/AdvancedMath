@@ -75,6 +75,11 @@ namespace AdvancedMath
         }
 
         /// <summary>
+        /// The raw double value stored for this number.
+        /// </summary>
+        internal double RawValue => value;
+
+        /// <summary>
         /// This Number as an integer. If the Number is not a whole number, it will be rounded to the nearest whole number.
         /// </summary>
         public int Integer => (int)Math.Round(Value);

@@ -18,6 +18,11 @@ namespace AdvancedMath
         #region Common Expressions
 
         /// <summary>
+        /// Shorthand to create a new Expression that is equal to 0.
+        /// </summary>
+        public static Expression Zero => new Expression(Term.Zero);
+
+        /// <summary>
         /// Shorthand to create a new Expression that is equal to 1.
         /// </summary>
         public static Expression One => new Expression(Term.One);
@@ -306,7 +311,24 @@ namespace AdvancedMath
 
             StringBuilder sb = new StringBuilder();
 
-            sb.Append(string.Join($" {Tokens.Add_Operator.ToChar()} ", terms.Select(t => t.ToString())));
+            //add the initial term
+            sb.Append(terms[0].ToString());
+
+            //if there are more, determine whether to print - or +
+            for (int i = 1; i < terms.Count; i++)
+            {
+                Term t = terms[i];
+
+                if(t.IsNegative)
+                {
+                    sb.Append(" - ");
+                    sb.Append(t.ToString(false));
+                } else
+                {
+                    sb.Append(" + ");
+                    sb.Append(t.ToString(false));
+                }
+            }
 
             return sb.ToString();
         }
@@ -328,7 +350,7 @@ namespace AdvancedMath
             return sb.ToString();
         }
 
-        public override string ToString(bool wrapInParenthesis)
+        public override string ToStringParentheses(bool wrapInParenthesis)
         {
             if (!wrapInParenthesis) return ToString();
 

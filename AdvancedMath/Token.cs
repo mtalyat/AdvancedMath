@@ -118,7 +118,7 @@ namespace AdvancedMath
         /// </summary>
         /// <param name="wrapInParenthesis">When true, the Token will be wrapped in parethesis, if necessary.</param>
         /// <returns></returns>
-        public virtual string ToString(bool wrapInParenthesis)
+        public virtual string ToStringParentheses(bool wrapInParenthesis)
         {
             StringBuilder sb = new StringBuilder();
 

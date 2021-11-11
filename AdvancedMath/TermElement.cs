@@ -203,13 +203,13 @@ namespace AdvancedMath
 
                 //always write the element
                 //wrap in parentheses if Element is an Expression
-                StringBuilder sb = new StringBuilder(Element.ToString(Element is Expression));
+                StringBuilder sb = new StringBuilder(Element.ToStringParentheses(Element is Expression));
 
                 //write the exponent, if it is not one
                 if (!(Exponent.Simplify() is Number n) || n != 1)
                 {
                     sb.Append(Tokens.Power_Operator.ToChar());
-                    sb.Append(Exponent.ToString(Exponent is Expression));
+                    sb.Append(Exponent.ToStringParentheses(Exponent is Expression));
                 }
 
                 return sb.ToString();

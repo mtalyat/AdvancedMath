@@ -49,21 +49,8 @@ namespace AdvancedMath
 
         public override bool IsZero => coefficientNumerator.IsZero || numerators.Any(n => n.IsZero);
 
-        public override bool IsNegative
-        {
-            get
-            {
-                //if the total number of negatives % 2 == 0, it is not negative
-                int negCount = 0;
-                if (coefficientNumerator.IsNegative) negCount++;
-                if (coefficientDenominator.IsNegative) negCount++;
-
-                negCount += numerators.Count(n => n.IsNegative);
-                negCount += denominators.Count(d => d.IsNegative);
-
-                return negCount % 2 == 1;
-            }
-        }
+        //as long as the numerator and denominator isNegative are different, the term is negative
+        public override bool IsNegative => coefficientNumerator.IsNegative ^ coefficientDenominator.IsNegative;
 
         /// <summary>
         /// The coefficient for the numerator.
@@ -726,7 +713,28 @@ namespace AdvancedMath
             return new Term((Number)coefficientNumerator.Clone(), (Number)coefficientDenominator.Clone(), numerators.Select(e => (TermElement)e.Clone()).ToArray(), denominators.Select(e => (TermElement)e.Clone()).ToArray());
         }
 
-        public override string ToString()
+        private string CoefficientToString(Number coefficient, bool showNegativeSign)
+        {
+            if (coefficient == -1)
+            {
+                //if a negative 1, only do the negative sign
+                return "-";
+            }
+            else
+            {
+                if (showNegativeSign)
+                {
+                    return coefficient.Value.ToString();
+                }
+                else
+                {
+                    //raw value will not show the negative sign at all
+                    return coefficient.RawValue.ToString();
+                }
+            }
+        }
+
+        public string ToString(bool showNegativeSign)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -739,18 +747,18 @@ namespace AdvancedMath
             //or if the denominator != 1, we print it
             if (coefficientNumerator != 1 || (printDenom && !printNum))
             {
-                sb.Append(coefficientNumerator);
+                sb.Append(CoefficientToString(coefficientNumerator, showNegativeSign));
             }
 
-            if(printNum)
+            if (printNum)
             {
-                foreach(TermElement te in numerators)
+                foreach (TermElement te in numerators)
                 {
                     sb.Append(te);
                 }
             }
 
-            if(printDenom)
+            if (printDenom)
             {
                 sb.Append(Tokens.Divide_Operator.ToChar());
 
@@ -758,12 +766,12 @@ namespace AdvancedMath
 
                 if (coefficientDenominator != 1 || denomsAllOne)
                 {
-                    sb.Append(coefficientDenominator);
+                    sb.Append(CoefficientToString(coefficientDenominator, showNegativeSign));
                 }
 
-                if(!denomsAllOne)
+                if (!denomsAllOne)
                 {
-                    foreach(TermElement te in denominators)
+                    foreach (TermElement te in denominators)
                     {
                         sb.Append(te);
                     }
@@ -774,6 +782,11 @@ namespace AdvancedMath
             if (sb.Length == 0) sb.Append("1");
 
             return sb.ToString();
+        }
+
+        public override string ToString()
+        {
+            return ToString(true);
         }
 
         /// <summary>

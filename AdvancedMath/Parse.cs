@@ -160,6 +160,8 @@ namespace AdvancedMath
              * When a parenthesis/bracket is hit, everything inside of it goes into an expression.
              */
 
+            if (!strs.Any()) return Expression.Zero;
+
             Expression output = new Expression();
 
             Element currentElement;
@@ -349,6 +351,8 @@ namespace AdvancedMath
 
             //get rid of spaces and double negatives
             str = str.Replace(" ", "").Replace("--", "+");
+
+            if (str == "") return new string[0];
 
             StringBuilder current = new StringBuilder();
 
