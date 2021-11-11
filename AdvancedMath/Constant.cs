@@ -16,7 +16,7 @@ namespace AdvancedMath
         /// <summary>
         /// Shorthand to create a new Constant with the value of pi (𝝅).
         /// </summary>
-        public static Constant PI => new Constant("pi", Math.PI);
+        public static Constant PI => new Constant("pi", "\u03a0", Math.PI);
 
         /// <summary>
         /// Shorthand to create a new Constant with the value of e (Euler's number).
@@ -24,6 +24,11 @@ namespace AdvancedMath
         public static Constant E => new Constant("e", Math.E);
 
         #endregion
+
+        /// <summary>
+        /// The name of this Constant.
+        /// </summary>
+        public string Name { get; private set; }
 
         /// <summary>
         /// The symbol that corresponds with this Constant.
@@ -40,12 +45,21 @@ namespace AdvancedMath
         #region Constructors
 
         /// <summary>
-        /// Creates a new Constant with the given symbol, and given value.
+        /// Creates a new Constant with the given symbol, and given value. The symbol is also the name.
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="val"></param>
-        public Constant(string symbol, double val) : base(val)
+        public Constant(string symbol, double val) : this(symbol, symbol, val) { }
+
+        /// <summary>
+        /// Creates a new Constant with the given name, symbol, and value. The name should reflect the symbol.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="symbol"></param>
+        /// <param name="val"></param>
+        public Constant(string name, string symbol, double val) : base(val)
         {
+            Name = name;
             Symbol = symbol;
         }
 

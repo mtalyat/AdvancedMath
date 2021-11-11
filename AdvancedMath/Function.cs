@@ -102,8 +102,15 @@ namespace AdvancedMath
 
         public override Number ToNumber()
         {
-            //functions are never numbers
-            return Number.NaN;
+            //if the function evaluates to a number, and the inputs are all constants, it can be done
+            if(methodInfo.ReturnType == typeof(Number) && arguments.All(a => a.IsConstant))
+            {
+                return (Number)methodInfo.Invoke(null, arguments.Select(a => a.Evaluate(Scope.Empty)).ToArray());
+            } else
+            {
+                //otherwise, it cannot be made into a number
+                return Number.NaN;
+            }
         }
 
         #endregion

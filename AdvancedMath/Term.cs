@@ -323,7 +323,8 @@ namespace AdvancedMath
             }
 
             //now it has a common denominator
-            return (Term)clone.Simplify();
+            //DO NOT SIMPLIFY, because we want it to stay as a common denominator
+            return (Term)clone;
         }
 
         /// <summary>
