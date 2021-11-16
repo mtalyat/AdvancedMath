@@ -21,7 +21,7 @@ namespace AdvancedMath
          * (New) Parsing Strategy:
          * 
          * Read string. Break up into tokens.
-         * Insert • operators where needed.
+         * Insert # operators where needed.
          * "4x^2 + 3/4x - -2" --> [4, •, x, ^, 2, +, 3, /, 4, •, x, +, 2]
          * "4min(2x, 5y) + 3" --> [4, •, min, (, 2, •, x, ,, 5, •, y, ), +, 3]
          * 

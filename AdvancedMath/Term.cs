@@ -203,6 +203,16 @@ namespace AdvancedMath
             } else
             {
                 //otherwise just add it to the list
+
+                //if it is negative, however, we want that as part of the coefficient
+                if(e.IsNegative)
+                {
+                    Token t = e.Multiply(Number.NegativeOne);
+                    e = t is TermToken tt ? tt : new TermToken(t, Number.One);
+
+                    coefficient *= -1;
+                }
+
                 //if the list only has 1 in it, replace the 1
                 if (list.Count == 1 && list[0].IsOne)
                 {
