@@ -14,10 +14,17 @@ namespace AdvancedMath
     /// </summary>
     public abstract class Operand : Element
     {
+        /// <summary>
+        /// Represents if this Operand is negative or not.
+        /// </summary>
         protected bool isNegative = false;
 
         public override bool IsNegative => isNegative;
 
+        /// <summary>
+        /// Sets the negative value of this Operand.
+        /// </summary>
+        /// <param name="neg"></param>
         public void SetNegative(bool neg)
         {
             isNegative = neg;
