@@ -37,7 +37,7 @@ namespace AdvancedMath
 
         /// <summary>
         /// A Token is a number if the Token can be represented as a singular number with no symbols.
-        /// Ex. "5" is a number, but "e" or "3/2" are not numbers.
+        /// Ex. "5" or "2.25" are numbers, but "e" or "3/2" are not numbers.
         /// </summary>
         public abstract bool IsNumber { get; }
 

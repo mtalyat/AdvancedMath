@@ -74,6 +74,8 @@ namespace AdvancedMath
             {
                 AddTerm(Term.Zero);
             }
+
+            SortTerms();
         }
 
         #endregion
@@ -274,26 +276,17 @@ namespace AdvancedMath
 
         public override Token Multiply(Token token)
         {
+            token = token.Reduce();
+
+            if(token is Term t)
+            {
+                //if the other one is a term, add this to it's numerator
+                return t.Multiply(Clone());
+            }
+
+            //otherwise throw this into a term
+            //expand will handle multiplying out the tokens with this Expression
             return new Term(new Token[] { Clone(), token });
-
-            //token = token.Reduce();
-
-            ////if the token is another Expression, FOIL all elements
-            //if (token is Expression e)
-            //{
-            //    return FOIL(e);
-            //}
-
-            //Expression output = new Expression();
-
-            ////otherwise, multiply all terms by the given token
-            //for (int i = 0; i < terms.Count; i++)
-            //{
-            //    output = (Expression)output.Add(terms[i].Multiply(token));
-            //}
-
-            ////lastly, simplify so that we know it is not all 0's
-            //return output.Simplify();
         }
 
         public override Number ToNumber()

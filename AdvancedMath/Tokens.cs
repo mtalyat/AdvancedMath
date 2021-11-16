@@ -33,6 +33,11 @@ namespace AdvancedMath
 
         public const char SUB = '_';
 
+        /// <summary>
+        /// Determines if the given char is an operator.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         public static bool IsOperator(char c)
         {
             return
@@ -47,6 +52,11 @@ namespace AdvancedMath
                 c == MODULUS;
         }
 
+        /// <summary>
+        /// Gets the amount of operands the given operator will need.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns>The amount of operands if c is an operator, otherwise 0.</returns>
         public static int OperatorTokenCount(char c)
         {
             switch (c)
@@ -54,11 +64,24 @@ namespace AdvancedMath
                 case NEGATION:
                 case FACTORIAL:
                     return 1;
-                default:
+                case ADDITION:
+                case SUBTRACTION:
+                case MULTIPLICATION:
+                case IMPLICIT_MULTIPLICATION:
+                case DIVISION:
+                case POWER:
+                case MODULUS:
                     return 2;
+                default:
+                    return 0;
             }
         }
 
+        /// <summary>
+        /// Gets the precedence of the given char, if it is an operator.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns>The precedence of the operator, otherwise 0.</returns>
         public static int GetOperatorPrecedence(char c)
         {
             switch (c)
