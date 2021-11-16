@@ -10,32 +10,54 @@ namespace AdvancedMath
     {
         class ParseToken
         {
-            private string token;
+            /// <summary>
+            /// The string token inside of this ParseToken.
+            /// </summary>
+            private readonly string token;
 
+            /// <summary>
+            /// Determines if this ParseToken is an operator.
+            /// </summary>
             public bool IsOperator => IsOperator(token[0]);
 
+            /// <summary>
+            /// Determines if this ParseToken is a function.
+            /// </summary>
             public bool IsFunction => Functions.GetFunction(token) != null;
 
+            /// <summary>
+            /// Determines if this ParseToken is an opening parenthesis.
+            /// </summary>
             public bool IsOpenParenthesis => IsToken(Tokens.OPEN_PARENTHESIS);
 
+            /// <summary>
+            /// Determines if this ParseToken is a closing parenthesis.
+            /// </summary>
             public bool IsCloseParenthesis => IsToken(Tokens.CLOSE_PARENTHESIS);
 
-            public bool IsOperand => IsVariable(token) || CheckIfNumber();
+            /// <summary>
+            /// Determines if this ParseToken is an Operand.
+            /// </summary>
+            public bool IsOperand => ToOperand() != null;
 
+            /// <summary>
+            /// Gets the precedence of this ParseToken. If this ParseToken is not an operator, Precedence will be 0.
+            /// </summary>
             public int Precedence => GetPrecedence();
 
+            /// <summary>
+            /// Creates a new ParseToken with the given string token.
+            /// </summary>
+            /// <param name="str"></param>
             public ParseToken(string str)
             {
                 token = str;
             }
 
-            private bool CheckIfNumber()
-            {
-                double d;
-
-                return double.TryParse(token, out d);
-            }
-
+            /// <summary>
+            /// Gets the precedence of this ParseToken. If this ParseToken is not an operator, Precedence will be 0.            
+            /// </summary>
+            /// <returns></returns>
             private int GetPrecedence()
             {
                 if (token.Length > 1) return 0;
@@ -43,6 +65,11 @@ namespace AdvancedMath
                 return Tokens.GetOperatorPrecedence(token[0]);
             }
 
+            /// <summary>
+            /// Determines if this ParseToken is equal to the given char token.
+            /// </summary>
+            /// <param name="c"></param>
+            /// <returns></returns>
             public bool IsToken(char c)
             {
                 if (token.Length > 1) return false;
@@ -50,6 +77,10 @@ namespace AdvancedMath
                 return token[0] == c;
             }
 
+            /// <summary>
+            /// Converts this ParseToken to an Operand, if able.
+            /// </summary>
+            /// <returns>The Operand representation of this ParseToken, or null if unable to represent as an Operand.</returns>
             public Operand ToOperand()
             {
                 double d;
@@ -57,14 +88,17 @@ namespace AdvancedMath
 
                 if (double.TryParse(token, out d))
                 {
+                    //this is a number
                     return new Number(d);
                 }
                 else if (Constant.TryGetConstant(token, out c))
                 {
+                    //this is a constant
                     return c;
                 }
                 else if (IsVariable(token))
                 {
+                    //this is a variable
                     string[] split = token.Split(Tokens.SUB);
 
                     if (split.Length == 1)
@@ -78,10 +112,15 @@ namespace AdvancedMath
                 }
                 else
                 {
+                    //something else
                     return null;
                 }
             }
 
+            /// <summary>
+            /// Converts this ParseToken into a Function, if able.
+            /// </summary>
+            /// <returns>The Function representation of this ParseToken, or null if unable to represent as an Function.</returns>
             public Function ToFunction()
             {
                 Function f;
@@ -91,6 +130,10 @@ namespace AdvancedMath
                 return f;
             }
 
+            /// <summary>
+            /// Gets the first char in the string token, and returns it.
+            /// </summary>
+            /// <returns></returns>
             public char ToChar()
             {
                 return token[0];
