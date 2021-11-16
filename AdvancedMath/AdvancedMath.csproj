@@ -45,6 +45,7 @@
     <Compile Include="Element.cs" />
     <Compile Include="Function.cs" />
     <Compile Include="HiddenAttribute.cs" />
+    <Compile Include="ParseToken.cs" />
     <Compile Include="ParsingException.cs" />
     <Compile Include="Expression.cs" />
     <Compile Include="Functions.cs" />
@@ -53,7 +54,7 @@
     <Compile Include="Parse.cs" />
     <Compile Include="Scope.cs" />
     <Compile Include="Term.cs" />
-    <Compile Include="TermElement.cs" />
+    <Compile Include="TermToken.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tokens.cs" />

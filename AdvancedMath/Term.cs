@@ -65,12 +65,12 @@ namespace AdvancedMath
         /// <summary>
         /// The list of Elements in the numerator.
         /// </summary>
-        private List<TermElement> numerators;
+        private List<TermToken> numerators;
 
         /// <summary>
         /// The list of Elements in the denominator.
         /// </summary>
-        private List<TermElement> denominators;
+        private List<TermToken> denominators;
 
         #region Constructors
 
@@ -93,11 +93,11 @@ namespace AdvancedMath
                 coefficientNumerator = Number.One;
                 coefficientDenominator = Number.One;
 
-                numerators = new List<TermElement>();
-                AddToNumerator(token is TermElement te ? te : new TermElement((Element)token, Number.One));
+                numerators = new List<TermToken>();
+                AddToNumerator(token is TermToken te ? te : new TermToken((Element)token, Number.One));
 
-                denominators = new List<TermElement>();
-                AddToDenominator(TermElement.One);
+                denominators = new List<TermToken>();
+                AddToDenominator(TermToken.One);
             }
 
             EnsureNomAndDenomAreNotEmpty();
@@ -107,21 +107,21 @@ namespace AdvancedMath
         /// Creates a new Term using the given Elements as the numerator.
         /// </summary>
         /// <param name="numerators"></param>
-        public Term(Element[] numerators) : this(Number.One, numerators) { }
+        public Term(Token[] numerators) : this(Number.One, numerators) { }
 
         /// <summary>
         /// Creates a new Term with the given coefficient, and the given Elements as the numerator.
         /// </summary>
         /// <param name="coefficient"></param>
         /// <param name="numerators"></param>
-        public Term(Number coefficient, Element[] numerators) : this(coefficient, Number.One, numerators, null) { }
+        public Term(Number coefficient, Token[] numerators) : this(coefficient, Number.One, numerators, null) { }
 
         /// <summary>
         /// Creates a new Term with the given coefficient, and the given Element as the numerator.
         /// </summary>
         /// <param name="coefficient"></param>
         /// <param name="numerator"></param>
-        public Term(Number coefficient, Element numerator) : this(coefficient, numerator, Number.One) { }
+        public Term(Number coefficient, Token numerator) : this(coefficient, numerator, Number.One) { }
 
         /// <summary>
         /// Creates a new Term with the given coefficient, and an Element with its corresponding Exponent that will go in the numerator.
@@ -129,14 +129,14 @@ namespace AdvancedMath
         /// <param name="coefficient"></param>
         /// <param name="numerator"></param>
         /// <param name="exponent"></param>
-        public Term(Number coefficient, Element numerator, Element exponent) : this(coefficient, new Element[] { new TermElement(numerator, exponent) }) { }
+        public Term(Number coefficient, Token numerator, Token exponent) : this(coefficient, new Token[] { new TermToken(numerator, exponent) }) { }
 
         /// <summary>
         /// Creates a new Term with the given list of Elements for both the numerator, and denominator.
         /// </summary>
         /// <param name="numerators"></param>
         /// <param name="denominators"></param>
-        public Term(Element[] numerators, Element[] denominators) : this(Number.One, Number.One, numerators, denominators) { }
+        public Term(Token[] numerators, Token[] denominators) : this(Number.One, Number.One, numerators, denominators) { }
 
         /// <summary>
         /// Creates a new Term with both the coefficient and Elements for both the nominator and denominator.
@@ -145,17 +145,17 @@ namespace AdvancedMath
         /// <param name="coefficientDenominator"></param>
         /// <param name="numerators"></param>
         /// <param name="denominators"></param>
-        public Term(Number coefficientNumerator, Number coefficientDenominator, Element[] numerators, Element[] denominators)
+        public Term(Number coefficientNumerator, Number coefficientDenominator, Token[] numerators, Token[] denominators)
         {
             this.coefficientNumerator = coefficientNumerator;
             this.coefficientDenominator = coefficientDenominator;
-            this.numerators = new List<TermElement>();
-            this.denominators = new List<TermElement>();
+            this.numerators = new List<TermToken>();
+            this.denominators = new List<TermToken>();
 
-            foreach (TermElement te in ConvertElementsToTermElements(numerators ?? new Element[0]))
+            foreach (TermToken te in ConvertElementsToTermTokens(numerators ?? new Element[0]))
                 AddToNumerator(te);
 
-            foreach (TermElement te in ConvertElementsToTermElements(denominators ?? new Element[0]))
+            foreach (TermToken te in ConvertElementsToTermTokens(denominators ?? new Element[0]))
                 AddToDenominator(te);
 
             EnsureNomAndDenomAreNotEmpty();
@@ -171,8 +171,8 @@ namespace AdvancedMath
         private void EnsureNomAndDenomAreNotEmpty()
         {
             //make sure there is at least something
-            if (!numerators.Any()) numerators.Add(TermElement.One);
-            if (!denominators.Any()) denominators.Add(TermElement.One);
+            if (!numerators.Any()) numerators.Add(TermToken.One);
+            if (!denominators.Any()) denominators.Add(TermToken.One);
         }
 
         /// <summary>
@@ -181,9 +181,9 @@ namespace AdvancedMath
         /// </summary>
         /// <param name="elements"></param>
         /// <returns></returns>
-        private TermElement[] ConvertElementsToTermElements(Element[] elements)
+        private TermToken[] ConvertElementsToTermTokens(Token[] elements)
         {
-            return elements.Select(e => e is TermElement te ? te : new TermElement(e, Number.One)).ToArray();
+            return elements.Select(e => e is TermToken te ? te : new TermToken(e, Number.One)).ToArray();
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace AdvancedMath
         /// <param name="e"></param>
         /// <param name="list"></param>
         /// <param name="coefficient"></param>
-        private void AddToList(TermElement e, List<TermElement> list, ref Number coefficient)
+        private void AddToList(TermToken e, List<TermToken> list, ref Number coefficient)
         {
             if (e.Exponent.IsZero) return;//if it is 1, it literally does not matter
 
@@ -217,13 +217,13 @@ namespace AdvancedMath
         /// Shorthand to call AddToList for the numerator.
         /// </summary>
         /// <param name="e"></param>
-        private void AddToNumerator(TermElement e) => AddToList(e, numerators, ref coefficientNumerator);
+        private void AddToNumerator(TermToken e) => AddToList(e, numerators, ref coefficientNumerator);
 
         /// <summary>
         /// Shorthand to call AddToList for the denominator.
         /// </summary>
         /// <param name="e"></param>
-        private void AddToDenominator(TermElement e) => AddToList(e, denominators, ref coefficientDenominator);
+        private void AddToDenominator(TermToken e) => AddToList(e, denominators, ref coefficientDenominator);
 
         #endregion
 
@@ -246,12 +246,12 @@ namespace AdvancedMath
             //then actually check the terms
 
             //terms are not necessarily in order
-            foreach (TermElement te in numerators)
+            foreach (TermToken te in numerators)
             {
                 if (!other.numerators.Any(t => t.Equals(te))) return false;
             }
 
-            foreach (TermElement te in denominators)
+            foreach (TermToken te in denominators)
             {
                 if (!other.denominators.Any(t => t.Equals(te))) return false;
             }
@@ -292,7 +292,7 @@ namespace AdvancedMath
             if (coefficientDenominator != other.coefficientDenominator || denominators.Count != other.denominators.Count) return false;
 
             //now check each element
-            foreach (TermElement te in denominators)
+            foreach (TermToken te in denominators)
             {
                 if (!other.denominators.Contains(te)) return false;
             }
@@ -316,7 +316,7 @@ namespace AdvancedMath
             clone.coefficientNumerator *= other.coefficientDenominator;
             clone.coefficientDenominator *= other.coefficientDenominator;
 
-            foreach (TermElement te in other.denominators)
+            foreach (TermToken te in other.denominators)
             {
                 clone.AddToNumerator(te);
                 clone.AddToDenominator(te);
@@ -346,7 +346,7 @@ namespace AdvancedMath
 
             for (int i = 0; i < numerators.Count; i++)
             {
-                TermElement te = (TermElement)numerators[i].Expand();
+                TermToken te = (TermToken)numerators[i].Expand();
 
                 Token reduced = te.Reduce();
 
@@ -388,7 +388,7 @@ namespace AdvancedMath
 
             output.Add(coefficientNumerator.Clone());
 
-            foreach(TermElement te in numerators)
+            foreach(TermToken te in numerators)
             {
                 Token reduced = te.Reduce();
 
@@ -422,7 +422,7 @@ namespace AdvancedMath
             }
 
             //return that in a term element
-            return new Term(new TermElement((Element)reduced, exponent));
+            return new Term(new TermToken((Element)reduced, exponent));
         }
 
         #endregion
@@ -434,18 +434,18 @@ namespace AdvancedMath
         /// </summary>
         /// <param name="list"></param>
         /// <returns></returns>
-        private Number FindHighestPower(List<TermElement> list)
+        private Number FindHighestPower(List<TermToken> list)
         {
             Number highest = Number.NaN;
 
-            foreach(TermElement te in list)
+            foreach(TermToken te in list)
             {
                 //we don't care about constants, only variables
                 if(te.Exponent.IsNumber)
                 {
                     //if it is a constant, then the power is 0 regardless
                     Number n;
-                    if(te.Element.IsConstant)
+                    if(te.Token.IsConstant)
                     {
                         n = Number.Zero;
                     } else
@@ -540,17 +540,17 @@ namespace AdvancedMath
 
             //now that that is done, check the numerator values
             //TODO: combine any variables and add their exponents together
-            Dictionary<Token, TermElement> newElements = new Dictionary<Token, TermElement>();
+            Dictionary<Token, TermToken> newElements = new Dictionary<Token, TermToken>();
 
-            foreach(TermElement e in numerators)
+            foreach(TermToken e in numerators)
             {
                 //start by simplifying the TermElement
-                TermElement simplified = (TermElement)e.Simplify();
+                TermToken simplified = (TermToken)e.Simplify();
 
                 //if exponent is zero, ignore it
                 if (simplified.Exponent.IsZero) continue;
 
-                Token ele = simplified.Element.Reduce();
+                Token ele = simplified.Token.Reduce();
                 Token exp = simplified.Exponent.Reduce();
 
                 //if it simplifies to a number, multiply it to the coefficient
@@ -560,13 +560,13 @@ namespace AdvancedMath
                     continue;
                 }
 
-                TermElement ne;
+                TermToken ne;
 
                 if(newElements.TryGetValue(ele, out ne))
                 {
                     //add to the exponent expression
                     //set it again in the dictionary
-                    ne = new TermElement(ne.Element, (Element)ne.Exponent.Add(exp).Simplify());
+                    ne = new TermToken(ne.Token, (Element)ne.Exponent.Add(exp).Simplify());
 
                     newElements[ele] = ne;
                 } else
@@ -636,7 +636,7 @@ namespace AdvancedMath
                     //then just add the numerators together
                     newNumerator = new Expression(new Term(clone.coefficientNumerator, clone.numerators.ToArray()), new Term(cdT.coefficientNumerator, cdT.numerators.ToArray()));
                     //then put that into the numerator of a new term with the correct values
-                    return new Term(Number.One, clone.coefficientDenominator, new TermElement[] { new TermElement(newNumerator, Number.One) }, clone.denominators.ToArray());
+                    return new Term(Number.One, clone.coefficientDenominator, new TermToken[] { new TermToken(newNumerator, Number.One) }, clone.denominators.ToArray());
                 }
             } else
             {
@@ -645,7 +645,7 @@ namespace AdvancedMath
                 Term clone = (Term)Clone();
 
                 clone.denominators.ForEach(d => clone.AddToNumerator(d));
-                clone.AddToNumerator(token is TermElement te ? te : new TermElement((Element)token, Number.One));
+                clone.AddToNumerator(token is TermToken te ? te : new TermToken((Element)token, Number.One));
 
                 return clone;
             }
@@ -667,7 +667,7 @@ namespace AdvancedMath
                 //if it is another term, merge num and denom
                 return new Term(coefficientNumerator * t.coefficientNumerator, coefficientDenominator * t.coefficientDenominator,
                     numerators.Concat(t.numerators).ToArray(), denominators.Concat(t.denominators).ToArray());
-            } else if (token is TermElement te)
+            } else if (token is TermToken te)
             {
                 Term clone = (Term)Clone();
 
@@ -677,7 +677,7 @@ namespace AdvancedMath
                     Number exp = te.Exponent.ToNumber();
                     if(exp < 0)
                     {
-                        clone.AddToDenominator(new TermElement(te.Element, exp));
+                        clone.AddToDenominator(new TermToken(te.Token, exp));
                         return clone;
                     }
                 }
@@ -690,7 +690,7 @@ namespace AdvancedMath
                 Term clone = (Term)Clone();
 
                 //if it is anything else, just add it to the numerator
-                clone.AddToNumerator(new TermElement((Element)token, Number.One));
+                clone.AddToNumerator(new TermToken((Element)token, Number.One));
 
                 return clone;
             }
@@ -711,7 +711,7 @@ namespace AdvancedMath
 
         public override Token Clone()
         {
-            return new Term((Number)coefficientNumerator.Clone(), (Number)coefficientDenominator.Clone(), numerators.Select(e => (TermElement)e.Clone()).ToArray(), denominators.Select(e => (TermElement)e.Clone()).ToArray());
+            return new Term((Number)coefficientNumerator.Clone(), (Number)coefficientDenominator.Clone(), numerators.Select(e => (TermToken)e.Clone()).ToArray(), denominators.Select(e => (TermToken)e.Clone()).ToArray());
         }
 
         private string CoefficientToString(Number coefficient, bool showNumberIfOne, bool showNegativeSign)
@@ -757,7 +757,7 @@ namespace AdvancedMath
 
             if (printNum)
             {
-                foreach (TermElement te in numerators)
+                foreach (TermToken te in numerators)
                 {
                     sb.Append(te);
                 }
@@ -776,7 +776,7 @@ namespace AdvancedMath
 
                 if (!denomsAllOne)
                 {
-                    foreach (TermElement te in denominators)
+                    foreach (TermToken te in denominators)
                     {
                         sb.Append(te);
                     }
@@ -802,16 +802,7 @@ namespace AdvancedMath
         /// <returns></returns>
         public static Term CreateFraction(Token numerator, Token denominator)
         {
-            if(numerator is Term n)
-            {
-                numerator = new Expression(n);
-            }
-            if(denominator is Term d)
-            {
-                denominator = new Expression(d);
-            }
-
-            return new Term(new Element[] { (Element)numerator }, new Element[] { (Element)denominator });
+            return new Term(new Token[] { numerator }, new Token[] { denominator });
         }
     }
 }

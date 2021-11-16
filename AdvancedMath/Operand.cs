@@ -18,6 +18,11 @@ namespace AdvancedMath
 
         public override bool IsNegative => isNegative;
 
+        public void SetNegative(bool neg)
+        {
+            isNegative = neg;
+        }
+
         //operands cannot ever be expanded
         public override Token Expand()
         {

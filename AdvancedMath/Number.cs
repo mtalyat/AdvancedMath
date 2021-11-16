@@ -204,12 +204,12 @@ namespace AdvancedMath
             else if (token is Term t)
             {
                 //if the token is a term, just add this number to the numerator of the term
-                return t.Add(Clone());
+                return t.Multiply(Clone());
             }
             else
             {
                 //if the term is anything else, this must go into a term
-                return new Term(new Element[] { (Number)Clone(), (Element)token });
+                return new Term(new Token[] { (Number)Clone(), token });
             }
         }
 

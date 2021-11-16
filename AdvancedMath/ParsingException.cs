@@ -38,9 +38,9 @@ namespace AdvancedMath
             errorToken = "";
         }
 
-        public ParsingException(string message, string token) : base(message)
+        public ParsingException(string message, object token) : base(message)
         {
-            errorToken = token;
+            errorToken = token.ToString();
         }
     }
 }

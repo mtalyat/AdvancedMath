@@ -59,7 +59,7 @@ namespace AdvancedMath
         /// Creates a new Expression with the given Tokens.
         /// </summary>
         /// <param name="tokens"></param>
-        public Expression(params Token[] tokens) : this(tokens.Select(e => (e is Term t) ? t : new Term((Element)e)).ToArray()) { }
+        public Expression(params Token[] tokens) : this(tokens.Select(e => new Term(e)).ToArray()) { }
 
         /// <summary>
         /// Creates a new Expression with the given Terms.
@@ -274,22 +274,26 @@ namespace AdvancedMath
 
         public override Token Multiply(Token token)
         {
-            //if the token is another Expression, FOIL all elements
-            if (token is Expression e)
-            {
-                return FOIL(e);
-            }
+            return new Term(new Token[] { Clone(), token });
 
-            Expression output = new Expression();
+            //token = token.Reduce();
 
-            //otherwise, multiply all terms by the given token
-            for (int i = 0; i < terms.Count; i++)
-            {
-                output = (Expression)output.Add(terms[i].Multiply(token));
-            }
+            ////if the token is another Expression, FOIL all elements
+            //if (token is Expression e)
+            //{
+            //    return FOIL(e);
+            //}
 
-            //lastly, simplify so that we know it is not all 0's
-            return output.Simplify();
+            //Expression output = new Expression();
+
+            ////otherwise, multiply all terms by the given token
+            //for (int i = 0; i < terms.Count; i++)
+            //{
+            //    output = (Expression)output.Add(terms[i].Multiply(token));
+            //}
+
+            ////lastly, simplify so that we know it is not all 0's
+            //return output.Simplify();
         }
 
         public override Number ToNumber()

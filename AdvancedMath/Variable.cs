@@ -85,6 +85,19 @@ namespace AdvancedMath
             Sub = sub;
         }
 
+        /// <summary>
+        /// Copy constructor.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="sub"></param>
+        /// <param name="negative"></param>
+        protected Variable(char symbol, uint sub, bool negative)
+        {
+            Symbol = symbol;
+            Sub = sub;
+            isNegative = negative;
+        }
+
         #endregion
 
         #region Solving
@@ -92,7 +105,12 @@ namespace AdvancedMath
         public override Token Evaluate(Scope scope)
         {
             //just return the corresponding value from the scope
-            return scope.Get(this);
+            Operand operand = scope.Get(this);
+
+            //apply negative
+            operand.SetNegative(IsNegative);
+
+            return operand;
         }
 
         public override Token Simplify()
@@ -176,7 +194,7 @@ namespace AdvancedMath
 
         public override Token Clone()
         {
-            return new Variable(Symbol);
+            return new Variable(Symbol, Sub, IsNegative);
         }
 
         public override string ToString()

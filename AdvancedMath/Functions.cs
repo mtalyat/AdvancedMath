@@ -112,6 +112,15 @@ namespace AdvancedMath
             return t1.ToNumber() % t2.ToNumber();
         }
 
+        public static Number Factorial(Token t)
+        {
+            Number n = t.ToNumber();
+
+            if (n <= 1) return n;
+
+            return n * Factorial(n - 1);
+        }
+
         #endregion
 
         #region Algebra
