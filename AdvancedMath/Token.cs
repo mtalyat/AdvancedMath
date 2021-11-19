@@ -214,11 +214,11 @@ namespace AdvancedMath
         {
             StringBuilder sb = new StringBuilder();
 
-            if (wrapInParenthesis) sb.Append(Tokens.OPEN_PARENTHESIS);
+            if (wrapInParenthesis) sb.Append(Symbols.OPEN_PARENTHESIS);
 
             sb.Append(ToString());
 
-            if (wrapInParenthesis) sb.Append(Tokens.CLOSE_PARENTHESIS);
+            if (wrapInParenthesis) sb.Append(Symbols.CLOSE_PARENTHESIS);
 
             return sb.ToString();
         }

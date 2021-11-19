@@ -56,11 +56,6 @@ namespace AdvancedMath
             return scope;
         }
 
-        public override string ToString()
-        {
-            return $"{left} = {right}";
-        }
-
         public Equation Evaluate(Scope scope)
         {
             Equation clone = Clone();
@@ -99,6 +94,13 @@ namespace AdvancedMath
             clone.right = clone.right.Expand();
 
             return clone;
+        }
+
+        public override string ToString()
+        {
+            //if sides are constant and not equal, print the not equals sign instead
+            //we can leave as = if a side is not constant since there is still a variable
+            return $"{left} {(left.IsConstant && right.IsConstant && left.ToNumber() != right.ToNumber() ? Symbols.NOT_EQUALS : Symbols.EQUALS)} {right}";
         }
 
         public Equation Clone()

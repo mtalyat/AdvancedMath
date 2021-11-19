@@ -60,14 +60,14 @@ namespace AdvancedMath
         /// <returns></returns>
         public static Equation ParseEquation(object o)
         {
-            string[] split = o.ToString().Split(Tokens.EQUALS);
+            string[] split = o.ToString().Split(Symbols.EQUALS);
 
             if(split.Length < 2)
             {
-                throw new ParsingException("The given object must include an equals sign!", Tokens.EQUALS);
+                throw new ParsingException("The given object must include an equals sign!", Symbols.EQUALS);
             } else if (split.Length > 2)
             {
-                throw new ParsingException("The given object must include only one equals sign!", Tokens.EQUALS);
+                throw new ParsingException("The given object must include only one equals sign!", Symbols.EQUALS);
             }
 
             //if split correctly, parse each side for the equation
@@ -138,12 +138,12 @@ namespace AdvancedMath
                     if((char.IsLetter(c) && current.Length > 0 && char.IsDigit(current[current.Length - 1])) ||
                         (char.IsLetterOrDigit(lastC) && IsOpeningBracket(c)))
                     {
-                        multiply = Tokens.IMPLICIT_MULTIPLICATION;
+                        multiply = Symbols.IMPLICIT_MULTIPLICATION;
                     }
 
                     if(IsClosingBracket(lastC) && IsOpeningBracket(c))
                     {
-                        multiply = Tokens.MULTIPLICATION;
+                        multiply = Symbols.MULTIPLICATION;
                     }
 
                     //only add if there is something there
@@ -168,15 +168,15 @@ namespace AdvancedMath
                 //either way, add it
 
                 //swap out with negation if needed
-                if(c == Tokens.SUBTRACTION && (lastC == ' ' || IsOperator(lastC)))
+                if(c == Symbols.SUBTRACTION && (lastC == ' ' || IsOperator(lastC)))
                 {
                     if(lastC == ' ')
                     {
                         output.Add("-1");
-                        current.Append(Tokens.IMPLICIT_MULTIPLICATION.ToString());
+                        current.Append(Symbols.IMPLICIT_MULTIPLICATION.ToString());
                     } else
                     {
-                        current.Append(Tokens.NEGATION);
+                        current.Append(Symbols.NEGATION);
                     }
                 } else
                 {
@@ -259,7 +259,7 @@ namespace AdvancedMath
 
                     operators.Push(token);
                 }
-                else if (token.IsToken(Tokens.SEPARATOR))
+                else if (token.IsToken(Symbols.SEPARATOR))
                 {
                     if (operators.Any())
                     {
@@ -371,7 +371,7 @@ namespace AdvancedMath
                     }
 
                     //if operator only uses one token, only grab one
-                    if(Tokens.OperatorTokenCount(token.ToChar()) == 1)
+                    if(Symbols.OperatorTokenCount(token.ToChar()) == 1)
                     {
                         Token t = operands.Pop();
 
@@ -432,25 +432,31 @@ namespace AdvancedMath
         /// <returns></returns>
         private static Token EvaluateOperator(char op, Token left, Token right)
         {
+            Function f;
+
             switch (op)
             {
-                case Tokens.IMPLICIT_MULTIPLICATION:
-                case Tokens.MULTIPLICATION:
-                    return left * right;
-                case Tokens.POWER:
-                    return left ^ right;
-                case Tokens.MODULUS:
-                    return left % right;
-                case Tokens.DIVISION:
-                    return left / right;
-                case Tokens.ADDITION:
-                    return left + right;
-                case Tokens.SUBTRACTION:
-                    return left - right;
-                case Tokens.NEGATION:
-                    return -left;
-                case Tokens.FACTORIAL:
-                    return !left;
+                case Symbols.IMPLICIT_MULTIPLICATION:
+                case Symbols.MULTIPLICATION:
+                    return left.Multiply(right);
+                case Symbols.POWER:
+                    return new Term.TermToken(left, right);
+                case Symbols.MODULUS:
+                    f = Operator.Modulus;
+                    f.AddArguments(new Token[] { left, right });
+                    return f;
+                case Symbols.DIVISION:
+                    return left.Multiply(Term.CreateFraction(Number.One, right));
+                case Symbols.ADDITION:
+                    return left.Add(right); 
+                case Symbols.SUBTRACTION:
+                    return left.Add(right.Multiply(Number.NegativeOne));
+                case Symbols.NEGATION:
+                    return left.Multiply(Number.NegativeOne);
+                case Symbols.FACTORIAL:
+                    f = Operator.Factorial;
+                    f.AddArgument(left);
+                    return f;
                 default:
                     throw new ParsingException("Unimplemented operator functionality.", op.ToString());
             }
@@ -465,7 +471,7 @@ namespace AdvancedMath
         /// <returns></returns>
         private static bool IsOperator(char c)
         {
-            return Tokens.IsOperator(c);
+            return Symbols.IsOperator(c);
         }
 
         /// <summary>
@@ -527,7 +533,7 @@ namespace AdvancedMath
         private static bool IsVariable(string str)
         {
             //variable if str matches "L" or "L_X...", where L is a letter and X is a digit
-            return (str.Length == 1 && char.IsLetter(str[0])) || (str.Length >= 3 && str[1] == Tokens.SUB);
+            return (str.Length == 1 && char.IsLetter(str[0])) || (str.Length >= 3 && str[1] == Symbols.SUB);
         }
 
         #endregion

@@ -367,9 +367,9 @@ namespace AdvancedMath
 
             StringBuilder sb = new StringBuilder();
 
-            sb.Append(Tokens.OPEN_PARENTHESIS);
+            sb.Append(Symbols.OPEN_PARENTHESIS);
             sb.Append(ToString());
-            sb.Append(Tokens.CLOSE_PARENTHESIS);
+            sb.Append(Symbols.CLOSE_PARENTHESIS);
 
             return sb.ToString();
         }

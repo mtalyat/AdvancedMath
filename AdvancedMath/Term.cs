@@ -406,7 +406,7 @@ namespace AdvancedMath
         }
 
         /// <summary>
-        /// Extracts the Elements from the Numerator.
+        /// Extracts the Tokens from the Numerator.
         /// </summary>
         /// <returns></returns>
         public Token[] Extract()
@@ -667,14 +667,12 @@ namespace AdvancedMath
                 }
             } else
             {
-                //if it is anything else, multiply it by the denominator
+                //if it is anything else, just throw it into an expression
                 //turn the nominator into an expression and add it
-                Term clone = (Term)Clone();
 
-                clone.denominators.ForEach(d => clone.AddToNumerator(d));
-                clone.AddToNumerator(token is TermToken te ? te : new TermToken((Element)token, Number.One));
+                //nevermind, just throw it into an expression
 
-                return clone;
+                return ToExpression().Add(token);
             }
         }
 
@@ -796,7 +794,7 @@ namespace AdvancedMath
 
             if (printDenom)
             {
-                sb.Append(Tokens.DIVISION);
+                sb.Append(Symbols.DIVISION);
 
                 bool denomsAllOne = denominators.All(e => e.IsOne);
 

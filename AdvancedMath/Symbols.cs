@@ -10,7 +10,7 @@ namespace AdvancedMath
     /// This class holds constants used throughout the program for displaying operators and such.
     /// Put in a class and made const so that they can be easily modified if needed.
     /// </summary>
-    internal static class Tokens
+    internal static class Symbols
     {
         public const char EMPTY = ' ';
 
@@ -18,6 +18,7 @@ namespace AdvancedMath
         public const char CLOSE_PARENTHESIS = ')';
 
         public const char EQUALS = '=';
+        public const char NOT_EQUALS = '≠';
 
         public const char ADDITION = '+';
         public const char SUBTRACTION = '-';
@@ -86,23 +87,23 @@ namespace AdvancedMath
         {
             switch (c)
             {
-                case Tokens.OPEN_PARENTHESIS:
-                case Tokens.CLOSE_PARENTHESIS:
+                case Symbols.OPEN_PARENTHESIS:
+                case Symbols.CLOSE_PARENTHESIS:
                     return 7;
-                case Tokens.SEPARATOR:
+                case Symbols.SEPARATOR:
                     return 6;
-                case Tokens.NEGATION:
+                case Symbols.NEGATION:
                     return 5;
-                case Tokens.POWER:
+                case Symbols.POWER:
                     return 4;
-                case Tokens.IMPLICIT_MULTIPLICATION:
-                case Tokens.MULTIPLICATION:
-                case Tokens.MODULUS:
-                case Tokens.DIVISION:
+                case Symbols.IMPLICIT_MULTIPLICATION:
+                case Symbols.MULTIPLICATION:
+                case Symbols.MODULUS:
+                case Symbols.DIVISION:
                     return 3;
-                case Tokens.SUBTRACTION:
+                case Symbols.SUBTRACTION:
                     return 2;
-                case Tokens.ADDITION:
+                case Symbols.ADDITION:
                     return 1;
                 default:
                     return 0;

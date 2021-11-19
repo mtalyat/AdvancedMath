@@ -28,12 +28,12 @@ namespace AdvancedMath
             /// <summary>
             /// Determines if this ParseToken is an opening parenthesis.
             /// </summary>
-            public bool IsOpenParenthesis => IsToken(Tokens.OPEN_PARENTHESIS);
+            public bool IsOpenParenthesis => IsToken(Symbols.OPEN_PARENTHESIS);
 
             /// <summary>
             /// Determines if this ParseToken is a closing parenthesis.
             /// </summary>
-            public bool IsCloseParenthesis => IsToken(Tokens.CLOSE_PARENTHESIS);
+            public bool IsCloseParenthesis => IsToken(Symbols.CLOSE_PARENTHESIS);
 
             /// <summary>
             /// Determines if this ParseToken is an Operand.
@@ -62,7 +62,7 @@ namespace AdvancedMath
             {
                 if (token.Length > 1) return 0;
 
-                return Tokens.GetOperatorPrecedence(token[0]);
+                return Symbols.GetOperatorPrecedence(token[0]);
             }
 
             /// <summary>
@@ -99,7 +99,7 @@ namespace AdvancedMath
                 else if (IsVariable(token))
                 {
                     //this is a variable
-                    string[] split = token.Split(Tokens.SUB);
+                    string[] split = token.Split(Symbols.SUB);
 
                     if (split.Length == 1)
                     {
