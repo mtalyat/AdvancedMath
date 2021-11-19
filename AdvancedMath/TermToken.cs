@@ -232,6 +232,25 @@ namespace AdvancedMath
 
                 return sb.ToString();
             }
+
+            public override Expression ToExpression()
+            {
+                Token reduced = Reduce();
+
+                if(reduced is Expression e)
+                {
+                    return e;
+                }
+                else
+                {
+                    return new Expression(reduced);
+                }
+            }
+
+            public override Term ToTerm()
+            {
+                return new Term(Clone());
+            }
         }
     }
 }

@@ -384,5 +384,23 @@ namespace AdvancedMath
 
             return clone;
         }
+
+        public override Expression ToExpression()
+        {
+            return (Expression)Clone();
+        }
+
+        public override Term ToTerm()
+        {
+            Token reduced = Reduce();
+
+            if(reduced is Term t)
+            {
+                return t;
+            } else
+            {
+                return new Term(reduced);
+            }
+        }
     }
 }

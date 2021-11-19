@@ -743,6 +743,8 @@ namespace AdvancedMath
             return new Term((Number)coefficientNumerator.Clone(), (Number)coefficientDenominator.Clone(), numerators.Select(e => (TermToken)e.Clone()).ToArray(), denominators.Select(e => (TermToken)e.Clone()).ToArray());
         }
 
+        #region ToString
+
         private string CoefficientToString(Number coefficient, bool showNumberIfOne, bool showNegativeSign)
         {
             if(coefficient.RawValue == 1 && !showNumberIfOne)
@@ -822,6 +824,8 @@ namespace AdvancedMath
         {
             return ToString(true);
         }
+
+        #endregion
 
         /// <summary>
         /// Creates a new Term that represents a fraction.

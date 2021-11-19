@@ -1,1 +1,16 @@
 ﻿TODO:
+
+Equation:
+- GetScope
+  * Find all variables within a Token, recursively
+  * Add method to Token class
+- Solve
+  * THIS METHOD OF SOLVING MAY BE FAULTY
+  * Look at scope
+  * One at a time until one variable left...
+    ~ Isolate the variable
+    ~ Substitute it in
+  * Solve for that variable
+  * Go back to equation, evaluate in values
+  * If left side == right side in value, then the values are correct, return scope
+  * If not... uhh....
