@@ -199,9 +199,9 @@ namespace AdvancedMath
         /// </summary>
         /// <param name="strs"></param>
         /// <returns></returns>
-        private static ParseToken[] StringTokensToParseTokens(string[] strs)
+        private static ParsingToken[] StringTokensToParseTokens(string[] strs)
         {
-            return strs.Select(s => new ParseToken(s)).ToArray();
+            return strs.Select(s => new ParsingToken(s)).ToArray();
         }
 
         /// <summary>
@@ -209,16 +209,16 @@ namespace AdvancedMath
         /// </summary>
         /// <param name="inTokens"></param>
         /// <returns></returns>
-        private static ParseToken[] InfixToPostfix(ParseToken[] inTokens)
+        private static ParsingToken[] InfixToPostfix(ParsingToken[] inTokens)
         {
-            Queue<ParseToken> tokens = new Queue<ParseToken>(inTokens);
+            Queue<ParsingToken> tokens = new Queue<ParsingToken>(inTokens);
 
-            Stack<ParseToken> outputs = new Stack<ParseToken>();
-            Stack<ParseToken> operators = new Stack<ParseToken>();
+            Stack<ParsingToken> outputs = new Stack<ParsingToken>();
+            Stack<ParsingToken> operators = new Stack<ParsingToken>();
 
             while (tokens.Count > 0)
             {
-                ParseToken token = tokens.Dequeue();
+                ParsingToken token = tokens.Dequeue();
 
                 if (token.IsOperand)
                 {
@@ -235,7 +235,7 @@ namespace AdvancedMath
                 {
                     if (operators.Any())
                     {
-                        ParseToken op = operators.Peek();
+                        ParsingToken op = operators.Peek();
 
                         int presDiff = op.Precedence - token.Precedence;
 
@@ -263,7 +263,7 @@ namespace AdvancedMath
                 {
                     if (operators.Any())
                     {
-                        ParseToken op = operators.Peek();
+                        ParsingToken op = operators.Peek();
 
                         while (op.IsOperator && !op.IsOpenParenthesis)
                         {
@@ -343,17 +343,17 @@ namespace AdvancedMath
         /// </summary>
         /// <param name="inTokens"></param>
         /// <returns></returns>
-        private static Token PostfixToToken(ParseToken[] inTokens)
+        private static Token PostfixToToken(ParsingToken[] inTokens)
         {
             if (inTokens.Length == 0) return Number.Zero;
 
-            Stack<ParseToken> tokens = new Stack<ParseToken>(inTokens);
+            Stack<ParsingToken> tokens = new Stack<ParsingToken>(inTokens);
 
             Stack<Token> operands = new Stack<Token>();
 
             while (tokens.Any())
             {
-                ParseToken token = tokens.Pop();
+                ParsingToken token = tokens.Pop();
 
                 Operand o = token.ToOperand();
                 Function f = token.ToFunction();

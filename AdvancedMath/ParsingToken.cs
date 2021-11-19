@@ -8,7 +8,7 @@ namespace AdvancedMath
 {
     public static partial class Parse
     {
-        class ParseToken
+        class ParsingToken
         {
             /// <summary>
             /// The string token inside of this ParseToken.
@@ -49,7 +49,7 @@ namespace AdvancedMath
             /// Creates a new ParseToken with the given string token.
             /// </summary>
             /// <param name="str"></param>
-            public ParseToken(string str)
+            public ParsingToken(string str)
             {
                 token = str;
             }

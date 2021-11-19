@@ -48,7 +48,7 @@
     <Compile Include="HiddenAttribute.cs" />
     <Compile Include="IMathematical.cs" />
     <Compile Include="Operator.cs" />
-    <Compile Include="ParseToken.cs" />
+    <Compile Include="ParsingToken.cs" />
     <Compile Include="ParsingException.cs" />
     <Compile Include="Expression.cs" />
     <Compile Include="Functions.cs" />
