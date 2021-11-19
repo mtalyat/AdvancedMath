@@ -400,25 +400,21 @@ namespace AdvancedMath
             {
                 case Tokens.IMPLICIT_MULTIPLICATION:
                 case Tokens.MULTIPLICATION:
-                    return left.Multiply(right);
+                    return left * right;
                 case Tokens.POWER:
-                    return new Term.TermToken(left, right);
+                    return left ^ right;
                 case Tokens.MODULUS:
-                    Function mod = Operator.Modulus;
-                    mod.AddArguments(new Token[] { left, right });
-                    return mod;
+                    return left % right;
                 case Tokens.DIVISION:
-                    return left.Multiply(Term.CreateFraction(Number.One, right));
+                    return left / right;
                 case Tokens.ADDITION:
-                    return left.Add(right);
+                    return left + right;
                 case Tokens.SUBTRACTION:
-                    return left.Add(right.Multiply(Number.NegativeOne));
+                    return left - right;
                 case Tokens.NEGATION:
-                    return left.Multiply(Number.NegativeOne);
+                    return -left;
                 case Tokens.FACTORIAL:
-                    Function fact = Operator.Factorial;
-                    fact.AddArgument(left);
-                    return fact;
+                    return !left;
                 default:
                     throw new ParsingException("Unimplemented operator functionality.", op.ToString());
             }

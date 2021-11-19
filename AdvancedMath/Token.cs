@@ -165,6 +165,42 @@ namespace AdvancedMath
             return left.Multiply(Term.CreateFraction(Number.One, right));
         }
 
+        /// <summary>
+        /// Modulus operator. Puts left Token and right Token into a Function that performs modulus.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static Token operator %(Token left, Token right)
+        {
+            Function f = Operator.Modulus;
+            f.AddArguments(new Token[] { left, right });
+            return f;
+        }
+
+        /// <summary>
+        /// Power operator. Raises left Token to the power of right Token.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static Token operator ^(Token left, Token right)
+        {
+            return new Term.TermToken(left, right);
+        }
+
+        /// <summary>
+        /// Factorial operator. Puts the Token into a Function that performs factorial.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static Token operator !(Token t)
+        {
+            Function f = Operator.Factorial;
+            f.AddArgument(t);
+            return f;
+        }
+
         #endregion
 
         #endregion
