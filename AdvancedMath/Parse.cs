@@ -192,7 +192,6 @@ namespace AdvancedMath
             Stack<ParseToken> outputs = new Stack<ParseToken>();
             Stack<ParseToken> operators = new Stack<ParseToken>();
 
-
             while (tokens.Count > 0)
             {
                 ParseToken token = tokens.Dequeue();
@@ -341,6 +340,12 @@ namespace AdvancedMath
                 }
                 else if (token.IsOperator)
                 {
+                    //check for too many operators again
+                    if (!operands.Any())
+                    {
+                        throw new ParsingException($"Parsing incomplete. Too many operators.", token);
+                    }
+
                     //if operator only uses one token, only grab one
                     if(Tokens.OperatorTokenCount(token.ToChar()) == 1)
                     {
@@ -350,6 +355,13 @@ namespace AdvancedMath
                     } else
                     {
                         Token right = operands.Pop();
+
+                        //check for too many operators again, since one was removed
+                        if (!operands.Any())
+                        {
+                            throw new ParsingException($"Parsing incomplete. Too many operators.", token);
+                        }
+
                         Token left = operands.Pop();
 
                         operands.Push(EvaluateOperator(token.ToChar(), left, right));
