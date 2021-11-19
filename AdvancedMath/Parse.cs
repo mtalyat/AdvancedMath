@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AdvancedMath
 {
+    /// <summary>
+    /// The Parse class is used to Parse other types into AdvancedMath tokens.
+    /// </summary>
     public static partial class Parse
     {
         /*
@@ -51,17 +54,17 @@ namespace AdvancedMath
         #region Parsing
 
         /// <summary>
-        /// Parses a string into a Token.
+        /// Parses an object into a Token.
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static Token ParseString(string str)
+        public static Token ParseObject(object o)
         {
             //split the string into stringified tokens
             //turn those tokens into managable ParseTokens
             //shuffle the parse tokens from infix notation to postfix notation
             //evaluate the postfix notation into a singular token
-            return PostfixToToken(InfixToPostfix(StringTokensToParseTokens(SplitString(str)))).Reduce();
+            return PostfixToToken(InfixToPostfix(StringTokensToParseTokens(SplitString(o.ToString())))).Reduce();
         }
 
         #endregion
