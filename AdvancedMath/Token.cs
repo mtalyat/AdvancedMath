@@ -91,6 +91,8 @@ namespace AdvancedMath
         /// <returns></returns>
         public abstract Token Clone();
 
+        #region Operations
+
         /// <summary>
         /// Adds another Token to this Token.
         /// Forces the addition. For instance, if you try to add 1/2 and 1/3, it will combine them into one Term instead of just putting them in an Expression.
@@ -106,9 +108,70 @@ namespace AdvancedMath
         /// <returns></returns>
         public abstract Token Multiply(Token token);
 
+        #region Operators
+
+        /// <summary>
+        /// Adding operator. Adds the right Token to the left Token.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static Token operator +(Token left, Token right)
+        {
+            return left.Add(right);
+        }
+
+        /// <summary>
+        /// Subtracting operator. Subtracts the right Token from the left Token.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static Token operator -(Token left, Token right)
+        {
+            return left.Add(-right);
+        }
+
+        /// <summary>
+        /// Negation operator. Multiplies the Token by -1.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static Token operator -(Token t)
+        {
+            return t.Multiply(Number.NegativeOne);
+        }
+
+        /// <summary>
+        /// Multiplying operator. Multiplies the left Token by the right Token.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static Token operator *(Token left, Token right)
+        {
+            return left.Multiply(right);
+        }
+
+        /// <summary>
+        /// Dividing operator. Divides the left Token by the right Token.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static Token operator /(Token left, Token right)
+        {
+            return left.Multiply(Term.CreateFraction(Number.One, right));
+        }
+
+        #endregion
+
+        #endregion
+
         /// <summary>
         /// Converts this Token into a Number, if able.
-        /// Use IsNumber before ToNumber, otherwise there may be unexpected results.
+        /// Use IsNumber or IsConstant before ToNumber, otherwise there may be unexpected results.
         /// </summary>
         /// <returns>The Number the Token is, or null if the conversion is not possible.</returns>
         public abstract Number ToNumber();
