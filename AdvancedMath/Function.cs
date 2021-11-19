@@ -28,9 +28,9 @@ namespace AdvancedMath
 
         public override bool HasConstantOrVariable => arguments.Any(a => a.HasConstantOrVariable);
 
-        private MethodInfo methodInfo;
+        protected MethodInfo methodInfo;
 
-        private List<Token> arguments;
+        protected List<Token> arguments;
 
         #region Constructors
 
@@ -79,7 +79,9 @@ namespace AdvancedMath
             //if the method returns a whole number, return it
             //otherwise return a new Function with the new evaluated arguments
 
-            Function clone = new Function(methodInfo, arguments.Select(a => a.Evaluate(scope)).ToArray());
+            Function clone = (Function)Clone();
+
+            clone.arguments = arguments.Select(a => a.Evaluate(scope)).ToList();
 
             if (clone.IsConstant)
             {
@@ -98,7 +100,11 @@ namespace AdvancedMath
         {
             //functions do not simplify
             //only simplify the arguments
-            return new Function(methodInfo, arguments.Select(a => a.Simplify()).ToArray());
+            Function clone = (Function)Clone();
+
+            clone.arguments = arguments.Select(a => a.Simplify()).ToList();
+
+            return clone;
         }
 
         public override Token Reduce()

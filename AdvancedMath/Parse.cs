@@ -404,7 +404,7 @@ namespace AdvancedMath
                 case Tokens.POWER:
                     return new Term.TermToken(left, right);
                 case Tokens.MODULUS:
-                    Function mod = Functions.GetFunction("Mod");
+                    Function mod = Operator.Modulus;
                     mod.AddArguments(new Token[] { left, right });
                     return mod;
                 case Tokens.DIVISION:
@@ -416,7 +416,7 @@ namespace AdvancedMath
                 case Tokens.NEGATION:
                     return left.Multiply(Number.NegativeOne);
                 case Tokens.FACTORIAL:
-                    Function fact = Functions.GetFunction("Factorial");
+                    Function fact = Operator.Factorial;
                     fact.AddArgument(left);
                     return fact;
                 default:

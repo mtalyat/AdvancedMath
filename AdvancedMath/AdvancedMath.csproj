@@ -45,6 +45,7 @@
     <Compile Include="Element.cs" />
     <Compile Include="Function.cs" />
     <Compile Include="HiddenAttribute.cs" />
+    <Compile Include="Operator.cs" />
     <Compile Include="ParseToken.cs" />
     <Compile Include="ParsingException.cs" />
     <Compile Include="Expression.cs" />

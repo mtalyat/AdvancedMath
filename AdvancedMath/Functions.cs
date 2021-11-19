@@ -74,6 +74,15 @@ namespace AdvancedMath
             return f;
         }
 
+        internal static MethodInfo GetMethodInfo(string name)
+        {
+            MethodInfo mi;
+
+            methods.TryGetValue(name.ToLower(), out mi);
+
+            return mi;
+        }
+
         #region General
         /*
          * General functions are functions that do not necessarily fall directly into one of the other categories.
@@ -107,7 +116,7 @@ namespace AdvancedMath
          * Operation functions are functions that perform unusual operations, such as modulus (%) or factorial (!).
          */
 
-        public static Number Mod(Token t1, Token t2)
+        public static Number Modulus(Token t1, Token t2)
         {
             return t1.ToNumber() % t2.ToNumber();
         }
