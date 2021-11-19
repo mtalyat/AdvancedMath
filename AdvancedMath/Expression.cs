@@ -289,6 +289,20 @@ namespace AdvancedMath
             return new Term(new Token[] { Clone(), token });
         }
 
+        /// <summary>
+        /// Multiplies all Terms in this Expression by the given Token. Returns a clone with the results.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public Expression MultiplyAll(Token token)
+        {
+            Expression clone = (Expression)Clone();
+
+            clone.terms = clone.terms.Select(t => (Term)(t.Multiply(token))).ToList();
+
+            return clone;
+        }
+
         public override Number ToNumber()
         {
             Number output = Number.One;

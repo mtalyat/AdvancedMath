@@ -352,40 +352,57 @@ namespace AdvancedMath
 
         public override Token Expand()
         {
-            Expression output = new Expression(coefficientNumerator);
+            //expand the numerator and denominator
+            return CreateFraction(ExpandList(numerators, coefficientNumerator), ExpandList(denominators, coefficientDenominator));
+        }
 
-            for (int i = 0; i < numerators.Count; i++)
+        /// <summary>
+        /// Expands the given list into an Expression.
+        /// Expanding is done by multiplying every Token in the list by every other Token in the list.
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="coefficient"></param>
+        /// <returns></returns>
+        private Token ExpandList(List<TermToken> list, Number coefficient)
+        {
+            Expression output = new Expression(coefficient);
+
+            for (int i = 0; i < list.Count; i++)
             {
-                TermToken te = (TermToken)numerators[i].Expand();
+                TermToken te = (TermToken)list[i].Expand();
 
                 Token reduced = te.Reduce();
 
-                if(reduced is Expression e)
+                if (reduced is Expression e)
                 {
                     output = output.FOIL(e);
-                } else if (reduced is Term t && !t.IsFraction)
+                }
+                else if (reduced is Term t && !t.IsFraction)
                 {
                     //term that cannot be reduced
                     //if the term is not a fraction, we can extract the contents
 
-                    foreach(Token extracted in t.Extract())
+                    foreach (Token extracted in t.Extract())
                     {
-                        if(extracted is Expression ee)
+                        if (extracted is Expression ee)
                         {
                             output = output.FOIL(ee);
-                        } else
+                        }
+                        else
                         {
-                            output = (Expression)output.Multiply(extracted);
+                            output = output.MultiplyAll(extracted);
                         }
                     }
-                } else
+                }
+                else
                 {
-                    //another type, just multiply
-                    output = (Expression)output.Multiply(reduced);
+                    //another type... multiply all elements by the token
+                    output = output.MultiplyAll(reduced);
                 }
             }
 
-            return new Term(output);
+            //reduce at the end, in case it is only one element
+            return output.Reduce();
         }
 
         /// <summary>
@@ -681,16 +698,18 @@ namespace AdvancedMath
             {
                 Term clone = (Term)Clone();
 
-                //if it has a negative exponent, put it on the bottom
-                if (te.Exponent.IsNumber && te.Exponent.ToNumber() < 0)
-                {
-                    Number exp = te.Exponent.ToNumber();
-                    if(exp < 0)
-                    {
-                        clone.AddToDenominator(new TermToken(te.Token, exp));
-                        return clone;
-                    }
-                }
+                //do not worry about negative exponent here
+
+                ////if it has a negative exponent, put it on the bottom
+                //if (te.Exponent.IsNumber && te.Exponent.ToNumber() < 0)
+                //{
+                //    Number exp = te.Exponent.ToNumber();
+                //    if(exp < 0)
+                //    {
+                //        clone.AddToDenominator(new TermToken(te.Token, exp));
+                //        return clone;
+                //    }
+                //}
 
                 clone.AddToNumerator(te);
 
