@@ -424,69 +424,6 @@ namespace AdvancedMath
             }
         }
 
-        /// <summary>
-        /// Creates a sub array from the given array, using the inclusive start and end indices.
-        /// </summary>
-        /// <param name="strs"></param>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        private static string[] SubArray(string[] strs, int start, int end)
-        {
-            int length = end - start + 1;
-
-            string[] output = new string[length];
-
-            Array.Copy(strs, start, output, 0, length);
-
-            return output;
-        }
-
-        /// <summary>
-        /// Finds the next corresponding bracket to the given opening bracket, starting at the index start.
-        /// </summary>
-        /// <param name="strs"></param>
-        /// <param name="start"></param>
-        /// <param name="open"></param>
-        /// <returns></returns>
-        private static int FindNextBracket(string[] strs, int start, char open)
-        {
-            int depth = 0;
-            char c;
-
-            for (int i = start; i < strs.Length; i++)
-            {
-                c = strs[i][0];
-
-                //if another opening bracket, increase the depth
-                if (IsOpeningBracket(c))
-                {
-                    //if an opening bracket, increase the depth
-                    depth++;
-                }
-                else if (IsClosingBracket(c))
-                {
-                    //if a closing bracket, and the depth is zero, the brackets should match
-                    if (depth == 0)
-                    {
-                        if (!IsMatchingBrackets(open, c))
-                        {
-                            throw new ParsingException($"Mismatch brackets: {open} does not match {c}.");
-                        }
-                        else
-                        {
-                            return i;
-                        }
-                    }
-
-                    depth--;
-                }
-            }
-
-            //if it got this far, it could not find the closing bracket
-            throw new ParsingException($"Mismatch brackets: The closing bracket for {open} could not be found.");
-        }
-
         #region Char Determination
 
         /// <summary>
