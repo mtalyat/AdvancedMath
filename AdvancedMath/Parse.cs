@@ -54,11 +54,32 @@ namespace AdvancedMath
         #region Parsing
 
         /// <summary>
+        /// Parses an object into an Equation.
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
+        public static Equation ParseEquation(object o)
+        {
+            string[] split = o.ToString().Split(Tokens.EQUALS);
+
+            if(split.Length < 2)
+            {
+                throw new ParsingException("The given object must include an equals sign!", Tokens.EQUALS);
+            } else if (split.Length > 2)
+            {
+                throw new ParsingException("The given object must include only one equals sign!", Tokens.EQUALS);
+            }
+
+            //if split correctly, parse each side for the equation
+            return new Equation(ParseToken(split[0]), ParseToken(split[1]));
+        }
+
+        /// <summary>
         /// Parses an object into a Token.
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static Token ParseObject(object o)
+        public static Token ParseToken(object o)
         {
             //split the string into stringified tokens
             //turn those tokens into managable ParseTokens
